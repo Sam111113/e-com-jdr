@@ -30,3 +30,11 @@ function getQueryClient(): postgres.Sql {
 
 export const db = drizzle(getQueryClient(), { schema });
 export type Database = typeof db;
+
+// Exporté pour les scripts CLI ponctuels (ex. scripts/import-games.ts) : le
+// pool de connexions `postgres-js` garde une socket ouverte en permanence,
+// donc un script qui l'utilise ne doit jamais oublier `await queryClient.end()`
+// à la fin, sinon le processus Node ne se termine jamais (la boucle
+// d'événements reste non vide). Ne pas appeler `.end()` dans une route Next.js
+// : le pool doit y rester ouvert entre les requêtes.
+export const queryClient: postgres.Sql = getQueryClient();
