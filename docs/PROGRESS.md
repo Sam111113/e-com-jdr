@@ -8,7 +8,7 @@
 | T1.2 | Plan technique **[VALIDATION ÉQUIPE]** | Terminée, **validée le 15/09 avec amendements** | Agent |
 | T1.3 | Socle technique et staging | **Terminée — déployée et vérifiée par l'équipe le 15/09** (`https://srv1214588.taild2e4d0.ts.net:8444`, tailnet uniquement) | Agent (worktree `main`, port 3100) |
 | T1.4 | Directions visuelles **[VALIDATION ÉQUIPE]** | **Terminée — direction B choisie le 15/09, avec thème sombre automatique en plus (D14)** | Agent (branche `t1.4-design`, fusionnée) |
-| T1.5 | Base de données et import des jeux | À faire | — |
+| T1.5 | Base de données et import des jeux | **Terminée — migrations et import vérifiés sur le staging le 15/09** | Agent, terminée par l'équipe (session interrompue pour budget) |
 | T1.6 | Pages du site | À faire | — |
 | T1.7 | Interrupteur de vente et configuration légale | À faire | — |
 | T1.8 | Achat et livraison (Stripe test) | À faire | — |
@@ -108,3 +108,14 @@
   - OpenCode (`:8443`) et n8n intacts.
 - **T1.3 terminée.** Débloque T1.5, T1.14 et T1.15.
 - **Prochaines tâches possibles :** T1.5 (base de données et import, avec le champ `type` de D15), T1.6 (pages, direction B + thème sombre), révision de T1.13 pour les chasses au trésor.
+
+### 15/09/2026 — T1.5 (agent, puis équipe)
+- **Agent** : schéma Drizzle complet (D8 compteur de factures, D12 `redirects`, D15 `type` libre validé en application), migrations `0000_init` et `0001_seed_invoice_counters`, stockage privé (`lib/storage`), validation des fiches, `npm run import-games`, `npm run rename-game` (redirection 301 sans chaîne), jeu factice « chasse au trésor » Halloween, tests unitaires.
+- **Session interrompue par l'équipe à 5,78 $** (budget API dépassé), en phase de vérification finale. L'équipe a terminé la tâche.
+- **Revue de l'équipe : 3 défauts corrigés**, chacun avec un test qui échouait sur l'ancien code :
+  1. `import-games` retirait le `kit.pdf` avant d'écrire en base : une image corrompue bloquait définitivement le jeu. Le kit n'est plus retiré qu'en fin de traitement, et un kit déjà stocké est rattaché.
+  2. `createDefaultStorage` utilisait `??` : avec `STORAGE_PRIVATE_DIR=` vide (valeur de `.env.example`), les fichiers privés partaient dans le dossier courant.
+  3. `.gitignore` n'excluait pas les `kit.pdf`, qui sont les produits vendus.
+- **Ajouts de l'équipe** : service Compose `tools` (migrations et import sur le staging, cité par `db/migrate.ts` mais inexistant), propriétaire du volume privé donné à l'utilisateur de l'app (sinon aucune écriture possible, bloquant pour T1.8), `design/` exclu du lint, procédure « Ajouter un jeu » et « Base de données » dans le README.
+- **Vérifié sur le staging** : 9 tables créées, compteurs de factures à 0, jeu factice importé, kit lisible par l'app et **non servi publiquement** (404), images servies, migrations et import relançables sans doublon. 42 tests unitaires, lint, TypeScript et build au vert.
+- **T1.5 terminée.** Débloque T1.6.

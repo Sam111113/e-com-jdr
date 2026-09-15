@@ -13,6 +13,13 @@
 - [x] **Staging déployé et vérifié** (T1.3) : `https://srv1214588.taild2e4d0.ts.net:8444`, tailnet uniquement, depuis `/root/apps/e-com-jdr-staging`. Mise à jour : section « Déploiement du staging » du `README.md`, étape 5.
 - [x] **Direction visuelle choisie** (T1.4) : direction B, avec thème sombre automatique en plus (D14).
 - [x] **Types de jeu élargis** : escape games, chasses au trésor et autres ; thème prioritaire Halloween (D15).
+- [x] **Base de données du staging en place** (T1.5) : migrations appliquées, jeu factice importé. Procédure : `README.md`, sections « Ajouter un jeu » et « Base de données : migrations et import ».
+
+## Pour chaque nouveau jeu (créateur des jeux)
+
+- Fournir le dossier du jeu (`fiche.md` d'après `content/_modele/fiche.md`, `cover.jpg`, `apercu-*.jpg`, `kit.pdf`).
+- **Transmettre `kit.pdf` hors de Git** (c'est le produit vendu) : il est copié à la main dans le dossier du jeu sur le staging, puis rangé dans le stockage privé par l'import.
+- Durées, préparation, nombre de joueurs, âge et matériel : fixés par le créateur du jeu dans la fiche, jamais par le site.
 
 ## Phase 1 — Urgent (bloque des tâches)
 

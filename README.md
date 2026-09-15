@@ -4,17 +4,17 @@ Site e-commerce de jeux à imprimer (escape games, chasses au trésor, murder
 parties, jeux d'enquête). Voir `AGENTS.md` et `docs/PLAN.md` pour le contexte complet, les
 phases et les décisions d'architecture.
 
-**Statut actuel :** socle technique (T1.3). Le catalogue, le paiement et les
-autres fonctionnalités arrivent dans les tâches suivantes (voir
-`docs/PROGRESS.md`). Les sections « Ajouter un jeu », « Ouvrir les ventes »
-et « Restaurer une sauvegarde » seront complétées par T1.5, T1.7/T3.9 et
+**Statut actuel :** socle technique (T1.3), base de données et import des jeux
+(T1.5). Le catalogue, le paiement et les autres fonctionnalités arrivent dans
+les tâches suivantes (voir `docs/PROGRESS.md`). Les sections « Ouvrir les
+ventes » et « Restaurer une sauvegarde » seront complétées par T1.7/T3.9 et
 T1.15.
 
 ## Stack
 
 - Next.js (App Router, TypeScript) + Tailwind CSS.
-- PostgreSQL 18 (arrive avec T1.5 côté application ; le conteneur Postgres
-  est déjà prêt dans `docker/docker-compose.yml`).
+- PostgreSQL 18 + Drizzle ORM (schéma dans `db/schema.ts`, migrations
+  versionnées dans `db/migrations/`).
 - Umami (statistiques, sans cookies) auto-hébergé.
 - Déploiement : Docker Compose, staging exposé uniquement via Tailscale
   Serve (aucun port public).
@@ -36,8 +36,44 @@ npm run dev
 # → http://localhost:3000 (demande le mot de passe HTTP Basic Auth défini dans .env)
 ```
 
-`DEV_DATABASE_URL` sera utilisée par Drizzle à partir de T1.5 ; aucune base
-n'est encore nécessaire pour cette page provisoire.
+Base de données de développement (`DEV_DATABASE_URL`) :
+
+```bash
+npm run db:migrate      # applique les migrations
+npm run import-games    # importe les jeux de content/games/
+```
+
+## Ajouter un jeu
+
+Le créateur du jeu fournit un dossier `content/games/<slug>/` :
+- `fiche.md`, rempli à partir du modèle `content/_modele/fiche.md` ;
+- `cover.jpg`, `apercu-1.jpg`, `apercu-2.jpg`… ;
+- `kit.pdf`, le produit vendu.
+
+1. **En développement**, importer le jeu :
+
+   ```bash
+   npm run import-games <slug>
+   ```
+
+   Une fiche incomplète produit une erreur qui nomme le champ en cause. L'import
+   génère les images optimisées (AVIF et WebP) dans `public/games/<slug>/`, puis
+   déplace `kit.pdf` dans le stockage privé.
+
+2. **Commiter** `fiche.md`, les images sources et `public/games/<slug>/`.
+   **Jamais `kit.pdf`** : c'est le produit vendu, il est ignoré par Git.
+
+3. **Sur le staging**, transmettre le kit hors de Git, puis importer :
+   - copier `kit.pdf` dans `/root/apps/e-com-jdr-staging/content/games/<slug>/` ;
+   - suivre « Mettre à jour le staging », puis « Base de données : migrations et
+     import » ci-dessous.
+
+**Renommer un jeu** (redirection 301 enregistrée automatiquement) :
+
+```bash
+npm run rename-game <ancien-slug> <nouveau-slug>
+npm run import-games <nouveau-slug>   # régénère les images sous le nouveau slug
+```
 
 ## Vérifier le socle technique (T1.3) sans Docker
 
@@ -155,10 +191,42 @@ et non depuis le dossier de travail des agents (`/root/workspace/e-com-jdr`) :
    sur ce VPS : ils supprimeraient des données, y compris potentiellement
    celles d'autres services hébergés (n8n).
 
+### Base de données : migrations et import
+
+Les migrations et l'import passent par le service `tools` (profil Compose
+« tools ») : il est lancé à la demande et jamais démarré en continu.
+
+**Première fois seulement**, donner le volume privé à l'utilisateur de
+l'application, sans quoi elle ne pourra pas y écrire :
+
+```bash
+cd /root/apps/e-com-jdr-staging
+docker compose -f docker/docker-compose.yml --env-file .env --profile tools run --rm --no-deps tools chown 1001:1001 /data/private
+```
+
+**Après chaque mise à jour du schéma ou des jeux :**
+
+```bash
+cd /root/apps/e-com-jdr-staging
+docker compose -f docker/docker-compose.yml --env-file .env --profile tools build tools
+docker compose -f docker/docker-compose.yml --env-file .env --profile tools run --rm tools npm run db:migrate
+docker compose -f docker/docker-compose.yml --env-file .env --profile tools run --rm tools npm run import-games
+```
+
+Migrations et import se relancent sans risque : ils ne créent rien en double.
+
+L'import retire chaque `kit.pdf` de `content/` pour le ranger dans le volume
+privé. Le kit du jeu factice étant versionné, le restaurer ensuite :
+
+```bash
+git checkout -- content/games/jeu-factice-chasse-au-tresor-halloween/kit.pdf
+```
+
 ## Tests
 
 ```bash
 npm run lint
 npm run build
+npm run test:unit  # utilise TEST_DATABASE_URL, base vidée à chaque exécution
 npm run test:e2e   # voir « Vérifier le socle technique » ci-dessus pour le lancer correctement
 ```

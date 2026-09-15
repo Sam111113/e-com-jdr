@@ -97,3 +97,14 @@
   - **T1.13 :** la recherche de mots-clés, centrée sur les escape games et les murder parties, est à compléter pour les chasses au trésor. Les slugs de collections proposés (`/escape-game-halloween`…) enferment chaque saison dans un seul type de jeu : **l'agent propose une structure qui couvre plusieurs types** (par exemple une page Halloween qui regroupe tous les types, et des pages par type), **à valider par l'équipe**.
 
 **Raison :** décision de l'équipe. L'intégrer avant T1.5 évite une migration du schéma et une refonte des URL déjà indexées plus tard.
+
+## D16 — Maintenance du staging par un conteneur d'outils, kits hors de Git
+*Décidé par l'équipe le 15/09/2026 (clôture de T1.5).*
+**Décision :**
+- Migrations et import des jeux passent par un service Compose `tools` (profil « tools », `run --rm`), construit sur une étape dédiée du Dockerfile, avec sources et dépendances de développement. L'image de production n'en contient rien.
+- `STORAGE_PRIVATE_DIR` est fixé à `/data/private` dans le Compose pour l'app et `tools`, quel que soit le `.env`.
+- `/data/private` appartient à l'utilisateur de l'app (uid 1001). Un volume déjà existant se corrige une seule fois avec `chown` (voir README).
+- Les `kit.pdf` sont exclus de Git ; seul le kit du jeu factice est versionné. Sur le staging, les vrais kits sont copiés à la main dans le dossier du jeu avant l'import.
+- `import-games` ne retire le kit local qu'une fois la base à jour.
+
+**Raison :** l'agent n'avait prévu aucun moyen d'appliquer les migrations sur le staging. Les kits sont les produits vendus et ne doivent jamais se retrouver sur GitHub. Sans le bon propriétaire de volume, l'app ne pourrait pas écrire les factures (T1.8).
