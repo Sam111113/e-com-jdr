@@ -13,6 +13,7 @@
 - [x] **Staging déployé et vérifié** (T1.3) : `https://srv1214588.taild2e4d0.ts.net:8444`, tailnet uniquement, depuis `/root/apps/e-com-jdr-staging`. Mise à jour : section « Déploiement du staging » du `README.md`, étape 5.
 - [x] **Direction visuelle choisie** (T1.4) : direction B, avec thème sombre automatique en plus (D14).
 - [x] **Types de jeu élargis** : escape games, chasses au trésor et autres ; thème prioritaire Halloween (D15).
+- [x] **Structure des pages collections validée** (T1.13, D17), murder party comprise, et **ton éditorial validé** (les 3 articles ont été réécrits en conséquence).
 - [x] **Base de données du staging en place** (T1.5) : migrations appliquées, jeu factice importé. Procédure : `README.md`, sections « Ajouter un jeu » et « Base de données : migrations et import ».
 
 ## Pour chaque nouveau jeu (créateur des jeux)
@@ -23,7 +24,7 @@
 
 ## Phase 1 — Urgent (bloque des tâches)
 
-- [ ] **Valider les 3 premiers articles de blog** (T1.13, branche `t1.13-seo`) : le brief exige l'accord de l'équipe sur le ton avant toute publication. Tant qu'ils ne sont pas validés, la branche `t1.13-seo` reste non fusionnée.
+- [ ] **Donner le feu vert final aux 3 articles réécrits** (`content/blog/`) : ils suivent le ton validé le 15/09, mais le brief exige l'accord de l'équipe avant toute publication.
 - [ ] **Créer un compte Stripe** (même non activé, le mode test suffit) et écrire les clés **test** dans le `.env` du VPS. *Nécessaire pour T1.8.*
 - [ ] **Installer Stripe CLI dans le conteneur de l'agent** (image `opencode-local`) avant T1.8 : le staging n'étant pas joignable par Stripe, les webhooks passent par `stripe listen --forward-to`.
 - [ ] **Créer un compte Brevo** et écrire la clé API dans le `.env` du VPS. *Nécessaire pour T1.9.*

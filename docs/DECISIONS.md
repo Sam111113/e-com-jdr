@@ -107,4 +107,14 @@
 - Les `kit.pdf` sont exclus de Git ; seul le kit du jeu factice est versionné. Sur le staging, les vrais kits sont copiés à la main dans le dossier du jeu avant l'import.
 - `import-games` ne retire le kit local qu'une fois la base à jour.
 
-**Raison :** l'agent n'avait prévu aucun moyen d'appliquer les migrations sur le staging. Les kits sont les produits vendus et ne doivent jamais se retrouver sur GitHub. Sans le bon propriétaire de volume, l'app ne pourrait pas écrire les factures (T1.8).
+**Raison :** l'agent n'avait prévu aucun moyen d'appliquer les migrations sur le staging.
+
+## D17 — Structure des pages collections : hubs par saison ou public, pages par type si la demande existe
+*Décidé par l'équipe le 15/09/2026 (validation de T1.13).*
+**Décision :**
+- **Hubs** qui regroupent tous les types de jeu : `/halloween`, `/noel`, `/saint-valentin`, `/paques`, `/anniversaire-enfant`, `/anniversaire-ado`, `/soiree-adulte`, `/evjf-evg`.
+- **Pages par type** seulement quand une requête dédiée et de vrais concurrents le justifient : `/escape-game-halloween`, `/chasse-au-tresor-halloween`, `/murder-party-a-imprimer`. Les autres combinaisons passent par le filtre du catalogue (`/jeux?type=…`).
+- **La murder party est un type de jeu confirmé**, au même titre que l'escape game et la chasse au trésor.
+- Détail et justification de chaque page : `docs/seo/mots-cles.md`, section 1bis. C'est la structure que T1.6 implémente.
+
+**Raison :** une URL par saison figée sur un seul type (`/escape-game-noel`) ne pouvait pas accueillir les chasses au trésor (D15). Ne créer une page par type que là où la demande est documentée évite les pages sans valeur (AGENTS.md section 6). Aucune page n'étant encore en ligne, le changement ne casse aucune URL. Les kits sont les produits vendus et ne doivent jamais se retrouver sur GitHub. Sans le bon propriétaire de volume, l'app ne pourrait pas écrire les factures (T1.8).

@@ -11,8 +11,9 @@ description: Ton, vocabulaire et règles de contenu propres au site de jeux à i
 - Pas de répétitions : un seul renvoi à la fiche du jeu par texte.
 
 ## Types de jeu et saisons
-- Types confirmés à ce jour : **escape game** et **chasse au trésor**. D'autres viendront, mais n'annonce un type de jeu (« notre catalogue comprend… ») que si l'équipe l'a confirmé.
+- Types confirmés à ce jour : **escape game**, **chasse au trésor** et **murder party**. D'autres viendront, mais n'annonce un type de jeu (« notre catalogue comprend… ») que si l'équipe l'a confirmé.
 - Thème prioritaire : **Halloween**.
+- Pour les liens internes, utilise les pages de la structure validée (D17, `docs/seo/mots-cles.md` section 1bis) : hubs `/halloween`, `/soiree-adulte`… et pages type `/escape-game-halloween`, `/chasse-au-tresor-halloween`, `/murder-party-a-imprimer`.
 
 ## Ce qui revient au créateur des jeux
 Un collègue de l'équipe crée les jeux. Ce n'est pas au site ni aux agents d'en fixer le contenu :
