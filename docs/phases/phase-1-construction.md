@@ -105,6 +105,7 @@ Développer et tester **tout le site** sur le staging (`staging.[DOMAINE]`), ave
 titre:
 slug:
 statut: brouillon        # brouillon | publie
+type: escape-game        # escape-game | chasse-au-tresor | murder-party | enquete… (liste extensible)
 collections: [halloween] # halloween, noel, anniversaire, saint-valentin, paques…
 public: enfants          # enfants | ados | adultes | famille
 age_min:
@@ -138,7 +139,7 @@ pitch:                   # 1 à 2 phrases
     - jeux phares ;
     - bloc « comment ça marche » ;
     - inscription email.
-  - **Catalogue `/jeux`**, filtrable par saison, public, âge, nombre de joueurs et durée.
+  - **Catalogue `/jeux`**, filtrable par type de jeu, saison, public, âge, nombre de joueurs et durée.
   - **Fiche jeu `/jeux/[slug]` :**
     - pitch, histoire, contenu du kit ;
     - aperçus de pages floutés ou filigranés ;
@@ -256,7 +257,7 @@ pitch:                   # 1 à 2 phrases
 - **À faire :**
   - **Recherche de mots-clés en français.** Si tu as accès au web, utilise l'autocomplétion Google, « Autres questions posées », Google Trends et les pages concurrentes.
     - Livrable : `docs/seo/mots-cles.md`. Pour chaque page cible : requête principale, requêtes secondaires, intention de recherche, saisonnalité.
-    - Exemples de familles : « escape game à imprimer », « escape game halloween enfant », « murder party halloween à télécharger », « jeu d'enquête anniversaire enfant », « escape game noël famille », « organiser un escape game à la maison ».
+    - Exemples de familles : « escape game à imprimer », « escape game halloween enfant », « chasse au trésor halloween enfant », « chasse au trésor à imprimer », « murder party halloween à télécharger », « jeu d'enquête anniversaire enfant », « escape game noël famille », « organiser un escape game à la maison ».
   - **Rôle de chaque type de page :**
     - pages collections : requêtes principales ;
     - fiches jeux : requêtes longues et précises ;

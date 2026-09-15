@@ -10,16 +10,13 @@
 - [x] **HTTPS décidé** : Tailscale Serve pour le staging, Caddy sur le futur VPS de production. Plus de DNS à configurer en phase 1.
 - [x] **Dépôt Git distant confirmé** : `github.com/Sam111113/e-com-jdr`.
 - [x] **PostgreSQL 18 et Chromium installés** dans le conteneur de l'agent (bases de dev et de test, tests E2E Playwright).
+- [x] **Staging déployé et vérifié** (T1.3) : `https://srv1214588.taild2e4d0.ts.net:8444`, tailnet uniquement, depuis `/root/apps/e-com-jdr-staging`. Mise à jour : section « Déploiement du staging » du `README.md`, étape 5.
+- [x] **Direction visuelle choisie** (T1.4) : direction B, avec thème sombre automatique en plus (D14).
+- [x] **Types de jeu élargis** : escape games, chasses au trésor et autres ; thème prioritaire Halloween (D15).
 
 ## Phase 1 — Urgent (bloque des tâches)
 
-- [ ] **Déployer le staging sur l'hôte (T1.3 prête, en attente de déploiement).** L'agent a préparé le socle technique (Next.js + Tailwind, `docker/docker-compose.yml`, page provisoire protégée par mot de passe et `noindex`, testée avec Playwright dans son conteneur). **Commandes exactes** : section « Déploiement du staging » du `README.md`. Résumé :
-  1. `git clone` du dépôt sur l'hôte (branche `main`), `cp .env.example .env`, remplir les valeurs (mot de passe du site, mot de passe Postgres, secret Umami), `chmod 600 .env`.
-  2. `docker compose -f docker/docker-compose.yml build && docker compose -f docker/docker-compose.yml up -d`.
-  3. Vérifier en local sur l'hôte (`curl` sur `127.0.0.1:3000` et `127.0.0.1:3001`, voir README).
-  4. `tailscale serve --bg --https=8444 http://127.0.0.1:3000`.
-  5. Confirmer à l'agent que `https://srv1214588.taild2e4d0.ts.net:8444` répond bien (401 sans mot de passe, 200 avec) depuis un appareil du tailnet.
-  *Bloque le passage de T1.3 à « terminée » dans `docs/PROGRESS.md`, et bloque T1.14/T1.15 (dépendent de T1.3 déployée).*
+- [ ] **Valider les 3 premiers articles de blog** (T1.13, branche `t1.13-seo`) : le brief exige l'accord de l'équipe sur le ton avant toute publication. Tant qu'ils ne sont pas validés, la branche `t1.13-seo` reste non fusionnée.
 - [ ] **Créer un compte Stripe** (même non activé, le mode test suffit) et écrire les clés **test** dans le `.env` du VPS. *Nécessaire pour T1.8.*
 - [ ] **Installer Stripe CLI dans le conteneur de l'agent** (image `opencode-local`) avant T1.8 : le staging n'étant pas joignable par Stripe, les webhooks passent par `stripe listen --forward-to`.
 - [ ] **Créer un compte Brevo** et écrire la clé API dans le `.env` du VPS. *Nécessaire pour T1.9.*
@@ -32,7 +29,7 @@
 
 ## Phase 1 — Important (à fournir avant les jalons correspondants)
 
-- [ ] **Valider une direction visuelle** parmi les deux propositions de T1.4 (vers le 18/09 selon le jalon du fichier de phase).
+- [ ] **Valider la structure des pages collections** que l'agent proposera en révisant T1.13 pour couvrir plusieurs types de jeu (D15). *Nécessaire avant T1.6.*
 - [ ] **Fournir le premier vrai jeu** (fiche + PDF + visuels) vers le 01/10. En attendant, l'agent utilise un jeu factice clairement marqué comme tel.
 - [ ] **Décider du modèle d'authentification admin** (T1.10) : compte partagé simple ou comptes nominatifs dès la phase 1 ?
 
