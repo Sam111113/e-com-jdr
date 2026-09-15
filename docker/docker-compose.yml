@@ -26,6 +26,10 @@ services:
     restart: unless-stopped
     env_file:
       - ../.env
+    environment:
+      # Forcé ici : un .env ancien ou une valeur vide ne doit jamais envoyer
+      # les fichiers privés ailleurs que dans le volume.
+      STORAGE_PRIVATE_DIR: /data/private
     ports:
       - "127.0.0.1:3000:3000"
     depends_on:
@@ -34,6 +38,30 @@ services:
       - ecomjdr
     volumes:
       - private_storage:/data/private
+
+  # Outils de maintenance (T1.5), lancés à la demande avec le profil « tools »,
+  # jamais en continu. Exemple :
+  #   docker compose -f docker/docker-compose.yml --env-file .env --profile tools run --rm tools npm run db:migrate
+  tools:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      target: tools
+    image: ecomjdr-tools:latest
+    profiles: ["tools"]
+    env_file:
+      - ../.env
+    environment:
+      STORAGE_PRIVATE_DIR: /data/private
+    volumes:
+      - private_storage:/data/private
+      # Jeux déposés par l'équipe, kit.pdf compris (jamais versionné) :
+      # l'import déplace chaque kit dans le volume privé.
+      - ../content:/app/content
+    depends_on:
+      - postgres
+    networks:
+      - ecomjdr
 
   postgres:
     image: postgres:18

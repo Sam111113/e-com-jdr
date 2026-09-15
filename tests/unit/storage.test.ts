@@ -1,10 +1,11 @@
 // Tests unitaires de l'interface `Storage` et de son implémentation
 // `LocalDiskStorage`. Voir docs/DECISIONS.md D3.
-import { describe, it, expect, beforeAll, afterAll } from "vitest";
+import { describe, it, expect, beforeAll, afterAll, vi } from "vitest";
 import fs from "node:fs/promises";
 import path from "node:path";
 import os from "node:os";
 import { LocalDiskStorage } from "../../lib/storage/local-disk";
+import { createDefaultStorage } from "../../lib/storage";
 import type { Storage } from "../../lib/storage/types";
 
 let tempDir: string;
@@ -17,6 +18,29 @@ beforeAll(async () => {
 
 afterAll(async () => {
   await fs.rm(tempDir, { recursive: true, force: true });
+});
+
+describe("createDefaultStorage", () => {
+  // `.env.example` contient `STORAGE_PRIVATE_DIR=` : une valeur vide doit
+  // être traitée comme absente, sinon les kits partent dans le dossier courant.
+  it("STORAGE_PRIVATE_DIR vide → data/private, jamais le dossier courant", async () => {
+    const previous = process.env.STORAGE_PRIVATE_DIR;
+    process.env.STORAGE_PRIVATE_DIR = "";
+    const cwdSpy = vi.spyOn(process, "cwd").mockReturnValue(tempDir);
+    try {
+      await createDefaultStorage().put("games/test-env-vide/kit.pdf", Buffer.from("x"));
+      await expect(
+        fs.access(path.join(tempDir, "data", "private", "games", "test-env-vide", "kit.pdf")),
+      ).resolves.toBeUndefined();
+      await expect(
+        fs.access(path.join(tempDir, "games", "test-env-vide", "kit.pdf")),
+      ).rejects.toThrow();
+    } finally {
+      cwdSpy.mockRestore();
+      if (previous === undefined) delete process.env.STORAGE_PRIVATE_DIR;
+      else process.env.STORAGE_PRIVATE_DIR = previous;
+    }
+  });
 });
 
 describe("LocalDiskStorage", () => {

@@ -18,8 +18,10 @@ export { LocalDiskStorage } from "./local-disk";
  *   local et tests).
  */
 export function createDefaultStorage(): Storage {
+  // `||` et non `??` : `.env.example` fournit `STORAGE_PRIVATE_DIR=` vide, qui
+  // doit se comporter comme une variable absente.
   const dir =
-    process.env.STORAGE_PRIVATE_DIR ??
+    process.env.STORAGE_PRIVATE_DIR ||
     path.join(process.cwd(), "data", "private");
   return new LocalDiskStorage(dir);
 }
