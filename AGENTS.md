@@ -27,7 +27,7 @@ N'attends pas ces informations pour avancer. En attendant, mets des **valeurs pr
 
 ## 1. Contexte et rôles
 
-Nous sommes une petite équipe française. Nous créons des **jeux à imprimer** : escape games, murder parties, jeux d'enquête et de rôle. Les clients les achètent en ligne et les téléchargent en PDF.
+Nous sommes une petite équipe française. Nous créons des **jeux à imprimer** : escape games, **chasses au trésor**, murder parties, jeux d'enquête et de rôle, et d'autres types de jeux à venir. Les clients les achètent en ligne et les téléchargent en PDF.
 
 - **L'équipe** crée les jeux (scénarios, énigmes, mise en page, tests). Elle fournit les PDF, les visuels et les fiches descriptives.
 - **Toi, l'agent,** tu prends en charge **le site e-commerce** : conception, développement, déploiement sur ce VPS et maintenance. Tu prends aussi en charge **le SEO**, technique et contenu.
@@ -38,6 +38,8 @@ Nous sommes une petite équipe française. Nous créons des **jeux à imprimer**
 - Saint-Valentin ;
 - Pâques ;
 - un catalogue permanent : anniversaires enfants et ados, soirées adultes, EVJF/EVG, puis une offre pro.
+
+**Thème prioritaire pour l'instant : Halloween.** Les autres saisons viendront ensuite.
 
 **Cible :** parents qui organisent des fêtes et groupes d'amis adultes, en France. Le trafic viendra surtout du **mobile** (Pinterest, TikTok, Instagram, Google).
 
@@ -149,6 +151,7 @@ Tu peux proposer mieux dans `docs/PLAN.md`, en justifiant.
 - **Mobile d'abord.**
 - **Ambiance** ludique et mystérieuse, qui parle aux parents comme aux adultes.
 - **Identité de marque stable**, avec des couleurs d'accent par saison en variables CSS (Halloween, Noël…).
+- **Thème clair et thème sombre**, qui suit automatiquement le réglage de l'appareil du visiteur (`prefers-color-scheme`). Les contrastes et les couleurs d'accent saisonnières doivent être valides dans les deux thèmes.
 - **Accessibilité de base :** contrastes, textes alternatifs, navigation au clavier, textes lisibles.
 - **Performance :** score Lighthouse mobile ≥ 90 sur les pages principales, images AVIF ou WebP, aucun script tiers inutile.
 

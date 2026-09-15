@@ -66,3 +66,34 @@
 *Décidé par l'équipe le 15/09/2026.*
 **Décision :** table `redirects (from_path, to_path)` créée en T1.5, sans chaîne ni boucle de redirections. Le mécanisme de détection d'un changement de slug est proposé en T1.5, sans modifier le modèle de fiche de l'équipe sans sa validation.
 **Raison :** T1.12 exige une redirection 301 automatique quand un slug change. La prévoir dès le schéma initial évite une migration plus tard et protège le référencement des pages déjà indexées.
+
+## D13 — Protection du staging : `proxy.ts` (Basic Auth fail-closed) + Dockerfile standalone
+*Décidé par l'agent le 15/09/2026 (T1.3).*
+**Décision :**
+- Le fichier de garde s'appelle `proxy.ts` (export `proxy`), pas `middleware.ts` : Next.js 16.3 a renommé cette convention (`middleware` génère un avertissement de dépréciation au build). Comportement inchangé (Basic Auth + en-tête `X-Robots-Tag`).
+- Le mot de passe est vérifié en mode **fail-closed** : si `STAGING_BASIC_AUTH_USER` ou `STAGING_BASIC_AUTH_PASSWORD` sont absentes de l'environnement, tout accès est bloqué (401) plutôt qu'autorisé par défaut. `/robots.txt` seul reste accessible sans mot de passe, pour faciliter sa vérification (il n'apporte aucune information et interdit de toute façon tout crawl).
+- `next.config.ts` utilise `output: "standalone"` et `docker/Dockerfile` fait un build multi-étapes qui copie manuellement `public/` et `.next/static/` à côté de `server.js`, comme l'exige cette sortie.
+- La base Umami est créée par un script d'initialisation Postgres (`docker/postgres-init/01-create-umami-db.sh`), monté dans `/docker-entrypoint-initdb.d` : un seul conteneur Postgres 18 héberge la base applicative et celle d'Umami, comme prévu par `docs/PLAN.md`.
+**Raison :** aligner le code sur la version de Next.js utilisée (16.3.5) sans avertissement au build ; éviter qu'une erreur de configuration du déploiement (variables de mot de passe oubliées) ouvre le staging sans protection ; réduire la taille de l'image Docker de production ; éviter un second conteneur Postgres seulement pour Umami.
+
+## D14 — Direction visuelle B, avec thème sombre automatique
+*Décidé par l'équipe le 15/09/2026 (clôture de T1.4).*
+**Décision :**
+- Le site suit la **direction B** (« Ludique pop » : `Baloo 2` + `Nunito`, formes et dégradés CSS, couleurs d'accent saisonnières en variables CSS). Les maquettes `design/direction-b/` sont la **référence visuelle** ; T1.6 les réimplémente en Next.js + Tailwind, sans reprendre le HTML statique tel quel.
+- **En plus : un thème sombre**, qui suit automatiquement le réglage de l'appareil du visiteur (`prefers-color-scheme`). Il garde l'identité de la direction B (polices, formes, accents saisonniers), sur fond sombre.
+- Contrastes vérifiés **dans les deux thèmes** (≥ 4,5:1 pour le texte courant), accents saisonniers compris.
+- **Défaut à corriger à l'intégration (T1.6) :** sur ordinateur, la navigation des maquettes passe sous le logo et se colle au bord gauche de l'écran. Relire les pages avec des captures **à la taille de l'écran**, pas seulement en pleine page.
+
+**Raison :** choix de l'équipe. Le trafic vient surtout du mobile, où le mode sombre est souvent activé ; suivre le réglage de l'appareil évite un écran blanc éblouissant, sans imposer de choix au visiteur.
+
+## D15 — Types de jeu élargis, Halloween en priorité
+*Décidé par l'équipe le 15/09/2026.*
+**Décision :**
+- Le catalogue n'est pas limité aux escape games : il comprend aussi des **chasses au trésor**, et d'autres types pourront s'ajouter (murder party, enquête…).
+- **Thème prioritaire : Halloween.** Les autres saisons viendront ensuite.
+- **Conséquences :**
+  - **T1.5 :** nouveau champ `type` dans le modèle de fiche (`escape-game`, `chasse-au-tresor`…), dont la liste doit pouvoir s'étendre sans refonte du schéma ;
+  - **T1.6 :** catalogue filtrable par type de jeu ;
+  - **T1.13 :** la recherche de mots-clés, centrée sur les escape games et les murder parties, est à compléter pour les chasses au trésor. Les slugs de collections proposés (`/escape-game-halloween`…) enferment chaque saison dans un seul type de jeu : **l'agent propose une structure qui couvre plusieurs types** (par exemple une page Halloween qui regroupe tous les types, et des pages par type), **à valider par l'équipe**.
+
+**Raison :** décision de l'équipe. L'intégrer avant T1.5 évite une migration du schéma et une refonte des URL déjà indexées plus tard.

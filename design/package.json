@@ -1,0 +1,12 @@
+{
+  "name": "design-captures-t1.4",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Outillage local T1.4 : génère les captures des maquettes statiques (design/direction-a, design/direction-b) avec Playwright + le Chromium système. Ne fait pas partie du socle Next.js (créé en parallèle par T1.3) et n'est pas versionné (voir .gitignore).",
+  "scripts": {
+    "capture": "node capture.js"
+  },
+  "devDependencies": {
+    "playwright": "1.63.0"
+  }
+}

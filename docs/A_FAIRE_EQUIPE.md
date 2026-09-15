@@ -10,10 +10,13 @@
 - [x] **HTTPS décidé** : Tailscale Serve pour le staging, Caddy sur le futur VPS de production. Plus de DNS à configurer en phase 1.
 - [x] **Dépôt Git distant confirmé** : `github.com/Sam111113/e-com-jdr`.
 - [x] **PostgreSQL 18 et Chromium installés** dans le conteneur de l'agent (bases de dev et de test, tests E2E Playwright).
+- [x] **Staging déployé et vérifié** (T1.3) : `https://srv1214588.taild2e4d0.ts.net:8444`, tailnet uniquement, depuis `/root/apps/e-com-jdr-staging`. Mise à jour : section « Déploiement du staging » du `README.md`, étape 5.
+- [x] **Direction visuelle choisie** (T1.4) : direction B, avec thème sombre automatique en plus (D14).
+- [x] **Types de jeu élargis** : escape games, chasses au trésor et autres ; thème prioritaire Halloween (D15).
 
 ## Phase 1 — Urgent (bloque des tâches)
 
-- [ ] **Déployer le staging sur l'hôte** quand l'agent aura préparé T1.3 : lancer le `docker compose` fourni, puis `tailscale serve --bg --https=8444 http://127.0.0.1:3000`. L'agent indiquera les commandes exactes dans le README. *Bloque la validation de T1.3.*
+- [ ] **Valider les 3 premiers articles de blog** (T1.13, branche `t1.13-seo`) : le brief exige l'accord de l'équipe sur le ton avant toute publication. Tant qu'ils ne sont pas validés, la branche `t1.13-seo` reste non fusionnée.
 - [ ] **Créer un compte Stripe** (même non activé, le mode test suffit) et écrire les clés **test** dans le `.env` du VPS. *Nécessaire pour T1.8.*
 - [ ] **Installer Stripe CLI dans le conteneur de l'agent** (image `opencode-local`) avant T1.8 : le staging n'étant pas joignable par Stripe, les webhooks passent par `stripe listen --forward-to`.
 - [ ] **Créer un compte Brevo** et écrire la clé API dans le `.env` du VPS. *Nécessaire pour T1.9.*
@@ -26,7 +29,7 @@
 
 ## Phase 1 — Important (à fournir avant les jalons correspondants)
 
-- [ ] **Valider une direction visuelle** parmi les deux propositions de T1.4 (vers le 18/09 selon le jalon du fichier de phase).
+- [ ] **Valider la structure des pages collections** que l'agent proposera en révisant T1.13 pour couvrir plusieurs types de jeu (D15). *Nécessaire avant T1.6.*
 - [ ] **Fournir le premier vrai jeu** (fiche + PDF + visuels) vers le 01/10. En attendant, l'agent utilise un jeu factice clairement marqué comme tel.
 - [ ] **Décider du modèle d'authentification admin** (T1.10) : compte partagé simple ou comptes nominatifs dès la phase 1 ?
 
