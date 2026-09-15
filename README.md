@@ -1,7 +1,7 @@
 # e-com-jdr
 
-Site e-commerce de jeux à imprimer (escape games, murder parties, jeux
-d'enquête). Voir `AGENTS.md` et `docs/PLAN.md` pour le contexte complet, les
+Site e-commerce de jeux à imprimer (escape games, chasses au trésor, murder
+parties, jeux d'enquête). Voir `AGENTS.md` et `docs/PLAN.md` pour le contexte complet, les
 phases et les décisions d'architecture.
 
 **Statut actuel :** socle technique (T1.3). Le catalogue, le paiement et les
@@ -81,11 +81,24 @@ mot de passe, affichage de la page une fois authentifié avec l'en-tête
 L'agent écrit les fichiers et les commandes ; **l'équipe les exécute** (voir
 `docs/A_FAIRE_EQUIPE.md`).
 
-1. **Première fois seulement** — cloner le dépôt sur l'hôte et préparer `.env` :
+Le staging tourne depuis un **clone dédié**, `/root/apps/e-com-jdr-staging`,
+et non depuis le dossier de travail des agents (`/root/workspace/e-com-jdr`) :
+- son `.env` (mots de passe) reste hors de portée des agents, dont le
+  conteneur ne voit que `/root/workspace` ;
+- le staging ne change que lorsque l'équipe tire volontairement un commit.
+
+> **Toutes les commandes `docker compose` se lancent depuis la racine du clone
+> avec `--env-file .env`.** Sans cette option, Compose cherche le `.env` dans
+> `docker/` pour interpoler les variables, et échoue.
+
+1. **Première fois seulement** — cloner le dépôt local et préparer `.env` :
 
    ```bash
-   git clone https://github.com/Sam111113/e-com-jdr.git
-   cd e-com-jdr
+   # Sur ce VPS de développement, on clone le dépôt local des agents : l'hôte
+   # n'a pas d'identifiants GitHub (dépôt privé). Sur le futur VPS de
+   # production, on clonera depuis GitHub avec une clé de déploiement.
+   git clone /root/workspace/e-com-jdr /root/apps/e-com-jdr-staging
+   cd /root/apps/e-com-jdr-staging
    cp .env.example .env
    chmod 600 .env
    # Éditer .env avec des valeurs réelles :
@@ -98,10 +111,10 @@ L'agent écrit les fichiers et les commandes ; **l'équipe les exécute** (voir
 2. **Construire et démarrer les conteneurs :**
 
    ```bash
-   cd e-com-jdr
-   docker compose -f docker/docker-compose.yml build
-   docker compose -f docker/docker-compose.yml up -d
-   docker compose -f docker/docker-compose.yml ps
+   cd /root/apps/e-com-jdr-staging
+   docker compose -f docker/docker-compose.yml --env-file .env build
+   docker compose -f docker/docker-compose.yml --env-file .env up -d
+   docker compose -f docker/docker-compose.yml --env-file .env ps
    ```
 
 3. **Vérifier en local sur l'hôte, avant d'exposer quoi que ce soit :**
@@ -124,18 +137,23 @@ L'agent écrit les fichiers et les commandes ; **l'équipe les exécute** (voir
 5. **Mettre à jour le staging après un nouveau commit :**
 
    ```bash
-   cd e-com-jdr
-   git pull
-   docker compose -f docker/docker-compose.yml build
-   docker compose -f docker/docker-compose.yml up -d
+   cd /root/apps/e-com-jdr-staging
+   git pull            # tire la branche main du dépôt local des agents
+   docker compose -f docker/docker-compose.yml --env-file .env build
+   docker compose -f docker/docker-compose.yml --env-file .env up -d
    ```
 
 6. **Logs et arrêt :**
 
    ```bash
-   docker compose -f docker/docker-compose.yml logs -f app
-   docker compose -f docker/docker-compose.yml down   # les volumes nommés (données) sont conservés
+   cd /root/apps/e-com-jdr-staging
+   docker compose -f docker/docker-compose.yml --env-file .env logs -f app
+   docker compose -f docker/docker-compose.yml --env-file .env down   # les volumes nommés (données) sont conservés
    ```
+
+   **Ne jamais utiliser `down -v`, `docker volume prune` ni `docker system prune`**
+   sur ce VPS : ils supprimeraient des données, y compris potentiellement
+   celles d'autres services hébergés (n8n).
 
 ## Tests
 

@@ -8,6 +8,14 @@
 #   - Sur ce VPS de développement, seuls 127.0.0.1:3000 (app) et
 #     127.0.0.1:3001 (Umami) sont publiés ; l'accès HTTPS externe passe par
 #     `tailscale serve` sur l'hôte (voir README), jamais par un port public.
+#
+# Toujours lancer depuis la racine du dépôt AVEC `--env-file .env` : sans cette
+# option, Compose cherche le .env à côté de ce fichier (docker/.env) pour
+# l'interpolation des variables, et échoue.
+
+# Nom de projet explicite : sinon Compose le déduit du dossier (« docker »),
+# un nom générique qui entrerait en collision avec d'autres projets.
+name: ecomjdr
 
 services:
   app:
@@ -36,7 +44,10 @@ services:
       POSTGRES_DB: ${POSTGRES_DB:-ecomjdr}
       UMAMI_POSTGRES_DB: ${UMAMI_POSTGRES_DB:-umami}
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      # Postgres 18+ range ses données dans /var/lib/postgresql/18/docker et
+      # refuse de démarrer si un volume est monté sur l'ancien chemin
+      # /var/lib/postgresql/data. On monte donc le dossier parent.
+      - postgres_data:/var/lib/postgresql
       - ./postgres-init:/docker-entrypoint-initdb.d:ro
     networks:
       - ecomjdr
