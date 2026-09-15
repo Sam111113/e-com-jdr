@@ -185,17 +185,26 @@ Tu peux proposer mieux dans `docs/PLAN.md`, en justifiant.
 
 ## 8. Contraintes de l'infrastructure réelle
 
-> Section ajoutée après audit du VPS. En cas de conflit, elle prime sur la section 4.
+> Section ajoutée après audit du VPS, mise à jour le 15/09/2026 après validation du plan. En cas de conflit, elle prime sur la section 4.
 
+- **Ce VPS sert au développement et au staging uniquement.** La production aura son propre VPS, provisionné plus tard par l'équipe avec le domaine définitif. Le domaine et le DNS ne bloquent pas la phase 1.
 - **Tu tournes dans un conteneur OpenCode (Alpine Linux), pas directement sur le VPS.**
   - Tu n'as ni Docker ni accès au système hôte : `uname`, `df` ou `ps` décrivent ton conteneur, pas le VPS.
   - Ton dépôt est dans `/root/workspace/e-com-jdr`, partagé avec l'hôte. Tu disposes de git, Node 24, npm, Python 3 et curl.
+- **Base de données de développement et de test**, dans ton conteneur, jamais exposée : **PostgreSQL 18**.
+  - `DEV_DATABASE_URL` → base `ecomjdr_dev` ;
+  - `TEST_DATABASE_URL` → base `ecomjdr_test`, que les tests peuvent vider librement.
+  - Utilise aussi PostgreSQL 18 (image `postgres:18`) dans les Docker Compose de staging et de production.
+- **Tests E2E :** Playwright fonctionne dans ton conteneur avec le Chromium du système. Passe `launchOptions: { executablePath: process.env.CHROMIUM_PATH }`. Le téléchargement des navigateurs Playwright est désactivé (`PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1`).
+- **Staging, accessible uniquement via Tailscale** (réseau privé de l'équipe, aucune exposition publique) :
+  - l'app est publiée sur `127.0.0.1:3000` de l'hôte et servie en HTTPS sur `https://srv1214588.taild2e4d0.ts.net:8444` ;
+  - Umami est publié sur `127.0.0.1:3001` ;
+  - garde quand même le mot de passe et le `noindex` exigés par la section 4 ;
+  - **webhooks Stripe :** Stripe ne peut pas joindre le staging, utilise Stripe CLI (`stripe listen --forward-to`) ;
+  - les liens envoyés par Brevo (double opt-in, téléchargements) ne s'ouvrent que depuis un appareil du tailnet : c'est normal en staging.
 - **Déploiement :** tu écris les fichiers (Docker Compose, configuration, scripts de sauvegarde) et les commandes exactes dans le README. **L'équipe les exécute sur l'hôte.** Ajoute chaque action à lancer dans `docs/A_FAIRE_EQUIPE.md`. Ne marque pas une tâche terminée tant que l'équipe n'a pas confirmé le résultat.
-- **Services à ne jamais toucher : n8n et son reverse proxy Traefik**, qui occupe les ports 80 et 443. **Caddy ne peut donc pas écouter sur 80/443.**
-  - Traefik découvre les conteneurs par labels (`exposedByDefault=false`) et possède un résolveur de certificats `mytlschallenge`. Un nouveau site peut obtenir le HTTPS avec des labels et une connexion au réseau `n8n_default`, **sans modifier la configuration de Traefik**.
-  - Cela relie tes conteneurs au réseau de n8n : **c'est une décision de l'équipe.** Présente-la dans `docs/PLAN.md` avec ses risques et les alternatives.
-- **Ports déjà pris sur l'hôte :** 22, 80, 443, 5678 (n8n, local), 4096 (OpenCode, local), 8443 (Tailscale).
-- **Tests :** sans Docker, prévois dans le plan une base Postgres pour le développement et les tests. Playwright ne supporte pas officiellement Alpine : prévois une solution (Chromium système, ou E2E lancés ailleurs).
+- **Services à ne jamais toucher sur ce VPS : n8n et son reverse proxy Traefik** (ports 80 et 443). **Ne relie jamais tes conteneurs au réseau `n8n_default`.** En production, sur son propre VPS, Caddy occupera 80/443 comme prévu en section 4.
+- **Ports déjà pris sur l'hôte :** 22, 80, 443, 5678 (n8n), 4096 (OpenCode), 8443 (Tailscale → OpenCode). **Réservés au staging :** 3000, 3001, 8444.
 - **Git :** tu pousses uniquement sur `github.com/Sam111113/e-com-jdr`. Chaque `git push` demande une approbation dans l'interface.
 - **Budget API limité.** Délègue aux workers :
   - `worker-explore` : l'exploration du code ;

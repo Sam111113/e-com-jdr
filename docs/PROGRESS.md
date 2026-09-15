@@ -5,8 +5,8 @@
 | ID | Tâche | Statut | Agent |
 |---|---|---|---|
 | T1.1 | Audit du VPS (lecture seule) | Terminée | Agent (données fournies par l'équipe depuis l'hôte) |
-| T1.2 | Plan technique **[VALIDATION ÉQUIPE]** | Terminée, en attente de validation | Agent |
-| T1.3 | Socle technique et staging | À faire (bloquée : DNS staging + décision HTTPS manquants) | — |
+| T1.2 | Plan technique **[VALIDATION ÉQUIPE]** | Terminée, **validée le 15/09 avec amendements** | Agent |
+| T1.3 | Socle technique et staging | À faire (débloquée ; la validation finale attendra le déploiement par l'équipe) | — |
 | T1.4 | Directions visuelles **[VALIDATION ÉQUIPE]** | À faire | — |
 | T1.5 | Base de données et import des jeux | À faire | — |
 | T1.6 | Pages du site | À faire | — |
@@ -33,3 +33,12 @@
 - **Arrêt demandé par le brief** : T1.1 et T1.2 sont terminées. L'agent attend la validation de l'équipe sur `docs/PLAN.md` avant de commencer T1.3 (bloquée de toute façon par le domaine/DNS et la décision HTTPS — voir `docs/A_FAIRE_EQUIPE.md`).
 - **Prochaine tâche** une fois validée : T1.3 (socle technique et staging), en parallèle T1.4 (design) et T1.13 (SEO, sans code).
 - **Ce qui bloque côté équipe :** voir `docs/A_FAIRE_EQUIPE.md`, section « Urgent — phase 1 ».
+
+### 15/09/2026 — Équipe
+- **T1.2 validée, avec amendements** (détail dans `docs/DECISIONS.md`) :
+  - **D6** : ce VPS sert au développement et au staging uniquement, la production aura son propre VPS. Staging via Tailscale Serve (`:8444`), aucun conteneur relié à `n8n_default`, pas de DNS en phase 1.
+  - **D8** : numérotation des factures par compteur transactionnel, séquences Postgres interdites.
+  - **D9** : PostgreSQL 18 et Chromium installés dans le conteneur de l'agent. Test E2E Playwright vérifié.
+  - **D10** : section 0 d'`AGENTS.md` laissée provisoire, dépôt Git confirmé.
+- `AGENTS.md` section 8 mise à jour en conséquence.
+- **Prochaine tâche :** T1.3 (socle technique et staging), en parallèle T1.4 (design) et T1.13 (SEO, sans code).

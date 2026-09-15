@@ -4,15 +4,25 @@
 
 ---
 
-## Phase 1 — Urgent (bloque le développement)
+## Phase 1 — Fait le 15/09/2026
 
-- [ ] **Compléter la section 0 « Tout de suite » d'`AGENTS.md`** : nom de la marque, domaine + registrar/DNS, email de contact public, dépôt Git distant (a priori `github.com/Sam111113/e-com-jdr`, à confirmer), contact pour les validations. *Sans ces infos, l'agent utilise des valeurs provisoires clairement marquées et ne peut pas configurer le sous-domaine `staging.[DOMAINE]`.*
-- [ ] **Choisir l'option HTTPS** pour le staging et la prod — voir `docs/PLAN.md`, section « Options pour le HTTPS » (Traefik partagé recommandé par l'agent, Cloudflare Tunnel en alternative, ou autre proposition de l'équipe). *Bloque T1.3.*
-- [ ] **Valider `docs/PLAN.md` (T1.2)** dans son ensemble. *Bloque le début du code (T1.3 et tout ce qui en dépend).*
-- [ ] **Configurer le DNS du sous-domaine `staging.[DOMAINE]`** une fois le domaine choisi (enregistrement A vers l'IP du VPS, ou CNAME si Cloudflare Tunnel est retenu). L'agent indiquera l'enregistrement exact une fois l'option HTTPS choisie.
+- [x] **Plan (T1.2) validé**, avec amendements (voir `docs/DECISIONS.md`, D6 à D10).
+- [x] **HTTPS décidé** : Tailscale Serve pour le staging, Caddy sur le futur VPS de production. Plus de DNS à configurer en phase 1.
+- [x] **Dépôt Git distant confirmé** : `github.com/Sam111113/e-com-jdr`.
+- [x] **PostgreSQL 18 et Chromium installés** dans le conteneur de l'agent (bases de dev et de test, tests E2E Playwright).
+
+## Phase 1 — Urgent (bloque des tâches)
+
+- [ ] **Déployer le staging sur l'hôte** quand l'agent aura préparé T1.3 : lancer le `docker compose` fourni, puis `tailscale serve --bg --https=8444 http://127.0.0.1:3000`. L'agent indiquera les commandes exactes dans le README. *Bloque la validation de T1.3.*
 - [ ] **Créer un compte Stripe** (même non activé, le mode test suffit) et écrire les clés **test** dans le `.env` du VPS. *Nécessaire pour T1.8.*
+- [ ] **Installer Stripe CLI dans le conteneur de l'agent** (image `opencode-local`) avant T1.8 : le staging n'étant pas joignable par Stripe, les webhooks passent par `stripe listen --forward-to`.
 - [ ] **Créer un compte Brevo** et écrire la clé API dans le `.env` du VPS. *Nécessaire pour T1.9.*
 - [ ] **Choisir la destination des sauvegardes hors du VPS** (T1.15) : service externe (ex. Backblaze B2, autre serveur) — création de compte par l'équipe si besoin.
+
+## Phase 1 — Non bloquant
+
+- [ ] **Compléter la section 0 « Tout de suite » d'`AGENTS.md`** : nom de la marque, email de contact public, contact pour les validations. *Laissée vide volontairement pour l'instant ; l'agent utilise des valeurs provisoires clairement marquées.*
+- [ ] **Faire valider le format des numéros de facture** (`F-000001` / `A-000001`, sans remise à zéro annuelle) par l'équipe ou son comptable. Le mécanisme sans rupture est déjà imposé (D8), seul le format est à confirmer.
 
 ## Phase 1 — Important (à fournir avant les jalons correspondants)
 
@@ -22,12 +32,13 @@
 
 ## Phase 1 — Plus tard mais à anticiper
 
-- [ ] **Mentions légales de pré-lancement (phase 2, T1.11/T2.2)** : tant que l'entreprise n'existe pas, indiquer qui sera nommé comme responsable de la publication et quel hébergeur mentionner (le VPS est chez qui ?).
+- [ ] **Mentions légales de pré-lancement (phase 2, T1.11/T2.2)** : tant que l'entreprise n'existe pas, indiquer qui sera nommé comme responsable de la publication. L'hébergeur à mentionner sera celui du **futur VPS de production** (le VPS actuel, chez Hostinger, ne sert qu'au développement).
 
 ---
 
 ## Phase 2 — À préparer
 
+- [ ] **Provisionner le VPS de production et acheter le domaine** avant la vitrine publique (jalon vers le 30/09). *Sans eux, la phase 2 ne peut pas démarrer.*
 - [ ] Accès à Google Search Console (ou ajout d'un enregistrement DNS de vérification).
 - [ ] Enregistrements DNS SPF, DKIM, DMARC pour Brevo (si l'agent n'a pas d'accès direct au DNS).
 - [ ] Textes et photos pour la page « à propos ».
