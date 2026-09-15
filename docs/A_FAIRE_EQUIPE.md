@@ -13,7 +13,13 @@
 
 ## Phase 1 — Urgent (bloque des tâches)
 
-- [ ] **Déployer le staging sur l'hôte** quand l'agent aura préparé T1.3 : lancer le `docker compose` fourni, puis `tailscale serve --bg --https=8444 http://127.0.0.1:3000`. L'agent indiquera les commandes exactes dans le README. *Bloque la validation de T1.3.*
+- [ ] **Déployer le staging sur l'hôte (T1.3 prête, en attente de déploiement).** L'agent a préparé le socle technique (Next.js + Tailwind, `docker/docker-compose.yml`, page provisoire protégée par mot de passe et `noindex`, testée avec Playwright dans son conteneur). **Commandes exactes** : section « Déploiement du staging » du `README.md`. Résumé :
+  1. `git clone` du dépôt sur l'hôte (branche `main`), `cp .env.example .env`, remplir les valeurs (mot de passe du site, mot de passe Postgres, secret Umami), `chmod 600 .env`.
+  2. `docker compose -f docker/docker-compose.yml build && docker compose -f docker/docker-compose.yml up -d`.
+  3. Vérifier en local sur l'hôte (`curl` sur `127.0.0.1:3000` et `127.0.0.1:3001`, voir README).
+  4. `tailscale serve --bg --https=8444 http://127.0.0.1:3000`.
+  5. Confirmer à l'agent que `https://srv1214588.taild2e4d0.ts.net:8444` répond bien (401 sans mot de passe, 200 avec) depuis un appareil du tailnet.
+  *Bloque le passage de T1.3 à « terminée » dans `docs/PROGRESS.md`, et bloque T1.14/T1.15 (dépendent de T1.3 déployée).*
 - [ ] **Créer un compte Stripe** (même non activé, le mode test suffit) et écrire les clés **test** dans le `.env` du VPS. *Nécessaire pour T1.8.*
 - [ ] **Installer Stripe CLI dans le conteneur de l'agent** (image `opencode-local`) avant T1.8 : le staging n'étant pas joignable par Stripe, les webhooks passent par `stripe listen --forward-to`.
 - [ ] **Créer un compte Brevo** et écrire la clé API dans le `.env` du VPS. *Nécessaire pour T1.9.*

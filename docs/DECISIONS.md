@@ -66,3 +66,12 @@
 *Décidé par l'équipe le 15/09/2026.*
 **Décision :** table `redirects (from_path, to_path)` créée en T1.5, sans chaîne ni boucle de redirections. Le mécanisme de détection d'un changement de slug est proposé en T1.5, sans modifier le modèle de fiche de l'équipe sans sa validation.
 **Raison :** T1.12 exige une redirection 301 automatique quand un slug change. La prévoir dès le schéma initial évite une migration plus tard et protège le référencement des pages déjà indexées.
+
+## D13 — Protection du staging : `proxy.ts` (Basic Auth fail-closed) + Dockerfile standalone
+*Décidé par l'agent le 15/09/2026 (T1.3).*
+**Décision :**
+- Le fichier de garde s'appelle `proxy.ts` (export `proxy`), pas `middleware.ts` : Next.js 16.3 a renommé cette convention (`middleware` génère un avertissement de dépréciation au build). Comportement inchangé (Basic Auth + en-tête `X-Robots-Tag`).
+- Le mot de passe est vérifié en mode **fail-closed** : si `STAGING_BASIC_AUTH_USER` ou `STAGING_BASIC_AUTH_PASSWORD` sont absentes de l'environnement, tout accès est bloqué (401) plutôt qu'autorisé par défaut. `/robots.txt` seul reste accessible sans mot de passe, pour faciliter sa vérification (il n'apporte aucune information et interdit de toute façon tout crawl).
+- `next.config.ts` utilise `output: "standalone"` et `docker/Dockerfile` fait un build multi-étapes qui copie manuellement `public/` et `.next/static/` à côté de `server.js`, comme l'exige cette sortie.
+- La base Umami est créée par un script d'initialisation Postgres (`docker/postgres-init/01-create-umami-db.sh`), monté dans `/docker-entrypoint-initdb.d` : un seul conteneur Postgres 18 héberge la base applicative et celle d'Umami, comme prévu par `docs/PLAN.md`.
+**Raison :** aligner le code sur la version de Next.js utilisée (16.3.5) sans avertissement au build ; éviter qu'une erreur de configuration du déploiement (variables de mot de passe oubliées) ouvre le staging sans protection ; réduire la taille de l'image Docker de production ; éviter un second conteneur Postgres seulement pour Umami.
