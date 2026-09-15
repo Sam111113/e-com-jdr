@@ -12,6 +12,9 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Maquettes HTML statiques et leur outillage de capture (T1.4) :
+    // référence visuelle, pas du code de l'application.
+    "design/**",
   ]),
 ]);
 

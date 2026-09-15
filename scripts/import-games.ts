@@ -180,20 +180,27 @@ async function importOneGame(opts: {
   }
 
   // (e) Gestion du kit.pdf (idempotence).
+  // Le fichier local n'est supprimé qu'en toute fin, une fois la base à jour :
+  // si une étape suivante échoue (image corrompue, base indisponible), le kit
+  // reste dans le dossier du jeu et un nouvel import peut réussir.
   const localKitPath = path.join(gameDir, "kit.pdf");
   const kitPdfKey = `games/${slug}/kit.pdf`;
   let finalKitKey: string | null = existing?.kitPdfKey ?? null;
+  let removeLocalKitAfterSuccess = false;
 
   if (fs.existsSync(localKitPath)) {
-    // Lire et envoyer dans le storage, puis supprimer le fichier local.
     const kitData = await fsp.readFile(localKitPath);
     await storage.put(kitPdfKey, kitData);
-    await fsp.unlink(localKitPath);
     finalKitKey = kitPdfKey;
+    removeLocalKitAfterSuccess = true;
   } else if (existing?.kitPdfKey) {
     // Réimport idempotent : le kit.pdf a déjà été déplacé, on conserve
     // la clé existante.
     // `finalKitKey` est déjà initialisé à `existing.kitPdfKey`.
+  } else if (await storage.exists(kitPdfKey)) {
+    // Kit déjà présent dans le stockage sans ligne en base (import précédent
+    // interrompu) : on le rattache au lieu de bloquer le jeu.
+    finalKitKey = kitPdfKey;
   } else {
     // Pas de fichier local ET pas de clé existante : erreur au premier import.
     errors.push(
@@ -304,7 +311,12 @@ async function importOneGame(opts: {
     })
     .returning({ id: games.id });
 
-  // (i) Succès.
+  // (i) Tout a réussi : on peut maintenant retirer le kit du dossier du jeu.
+  if (removeLocalKitAfterSuccess) {
+    await fsp.unlink(localKitPath);
+  }
+
+  // (j) Succès.
   return { slug, ok: true, gameId: upserted.id };
 }
 

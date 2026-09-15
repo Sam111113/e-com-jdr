@@ -46,6 +46,12 @@ next-env.d.ts
 # stockage privé local (T1.5), jamais commité
 /data/private
 
+# Kits PDF des jeux : ce sont les produits vendus, ils ne doivent jamais
+# partir sur GitHub. `npm run import-games` les déplace dans le stockage privé.
+# Seul le kit du jeu factice (contenu de démonstration) est versionné.
+content/games/*/kit.pdf
+!content/games/jeu-factice-*/kit.pdf
+
 # éditeurs
 .vscode/*
 !.vscode/extensions.json

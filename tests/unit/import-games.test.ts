@@ -234,6 +234,45 @@ describe("importGames — réimport idempotent", () => {
   });
 });
 
+describe("importGames — reprise après un import interrompu", () => {
+  it("échec après l'envoi du kit (image corrompue) → kit.pdf local conservé, puis réimport réussi", async () => {
+    const slug = "test-image-corrompue";
+    const gameDir = await createFixtureGame(slug);
+    const apercuPath = path.join(gameDir, "apercu-1.jpg");
+    await fsp.writeFile(apercuPath, Buffer.from("pas une image"));
+
+    const results1 = await importGames(makeOptions({ only: slug }));
+    expect(results1[0].ok).toBe(false);
+
+    // Le kit n'a pas été retiré du dossier, et rien n'a été écrit en base.
+    expect(fs.existsSync(path.join(gameDir, "kit.pdf"))).toBe(true);
+    const rows = await db.select().from(games).where(eq(games.slug, slug));
+    expect(rows).toHaveLength(0);
+
+    // Une fois l'image corrigée, l'import aboutit et le kit est déplacé.
+    await generateTestJpeg(apercuPath);
+    const results2 = await importGames(makeOptions({ only: slug }));
+    expect(results2[0].ok).toBe(true);
+    expect(fs.existsSync(path.join(gameDir, "kit.pdf"))).toBe(false);
+    expect(await storage.exists(`games/${slug}/kit.pdf`)).toBe(true);
+  });
+
+  it("kit déjà dans le stockage mais absent en base → import réussi sans kit local", async () => {
+    const slug = "test-kit-deja-stocke";
+    await createFixtureGame(slug, { skipKit: true });
+    await storage.put(`games/${slug}/kit.pdf`, Buffer.from("%PDF-1.4 kit déjà stocké"));
+
+    const results = await importGames(makeOptions({ only: slug }));
+    expect(results[0].ok).toBe(true);
+
+    const [row] = await db
+      .select({ kitPdfKey: games.kitPdfKey })
+      .from(games)
+      .where(eq(games.slug, slug));
+    expect(row.kitPdfKey).toBe(`games/${slug}/kit.pdf`);
+  });
+});
+
 describe("importGames — erreurs claires", () => {
   it("fiche sans age_min → erreur mentionnant age_min", async () => {
     const slug = "test-sans-age-min";
