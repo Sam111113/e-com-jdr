@@ -40,9 +40,9 @@ Cohérents avec le modèle de fiche (T1.5, champ `collections`) et avec les exem
 
 ---
 
-## 1bis. Structure des pages collections — révisée (D15) — **[VALIDATION ÉQUIPE]**
+## 1bis. Structure des pages collections — révisée (D15) — **validée par l'équipe le 15/09/2026**
 
-> Répond à la demande explicite de D15 (`docs/DECISIONS.md`) : « l'agent propose une structure qui couvre plusieurs types (par exemple une page Halloween qui regroupe tous les types, et des pages par type), à valider par l'équipe ». Cette section **remplace** la proposition de la section 1. Elle **attend la validation de l'équipe**, comme toute décision de structure d'URL (AGENTS.md section 2 : les tâches marquées [VALIDATION ÉQUIPE] s'arrêtent là).
+> Répond à la demande explicite de D15 (`docs/DECISIONS.md`) : « l'agent propose une structure qui couvre plusieurs types (par exemple une page Halloween qui regroupe tous les types, et des pages par type), à valider par l'équipe ». Cette section **remplace** la proposition de la section 1. **Validée telle quelle par l'équipe le 15/09/2026, pages `/soiree-adulte` et `/murder-party-a-imprimer` comprises** (décision D17) : c'est la structure que T1.6 implémente.
 
 ### Principe retenu
 
