@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="fr" data-season="halloween">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Le Cabinet des Énigmes — Jeux à imprimer</title>
+  <meta name="description" content="Maquette de design — marque et jeu factices, uniquement à but de démonstration visuelle.">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- ========== BANDEAU DÉMO ========== -->
+  <div class="demo-banner">
+    Maquette de design — marque et jeu factices, uniquement à but de démonstration visuelle
+  </div>
+
+  <!-- ========== MENU TOGGLE (checkbox invisible) ========== -->
+  <input type="checkbox" id="menu-toggle" class="sr-only">
+
+  <!-- ========== HEADER ========== -->
+  <header class="site-header">
+    <div class="header-inner">
+      <a href="index.html" class="logo" aria-label="Le Cabinet des Énigmes — Accueil">
+        Le Cabinet des Énigmes
+        <span class="badge-provisoire">(nom provisoire)</span>
+      </a>
+      <label for="menu-toggle" class="hamburger-label" aria-label="Menu">
+        <span></span>
+        <span></span>
+        <span></span>
+      </label>
+    </div>
+    <div class="nav-wrapper">
+      <nav class="main-nav" aria-label="Navigation principale">
+        <a href="index.html">Accueil</a>
+        <a href="#jeux-phares">Jeux</a>
+        <a href="#comment-ca-marche">Comment ça marche</a>
+        <a href="#">Blog</a>
+        <a href="#">Contact</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- ========== HERO ========== -->
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="hero-badge">Saison Halloween</div>
+      <h1 id="hero-title">Des soirées à énigmes à imprimer,<br>dans votre salon</h1>
+      <p class="hero-subtitle">
+        Plongez dans des univers mystérieux où chaque détail compte. Téléchargez,
+        imprimez, et transformez votre salon en scène de crime.
+      </p>
+      <div class="hero-actions">
+        <a href="#jeux-phares" class="btn btn-primary">Découvrir les jeux</a>
+        <a href="#newsletter" class="btn btn-secondary">Être prévenu·e des nouveautés</a>
+      </div>
+    </section>
+
+    <!-- ========== JEUX PHARES ========== -->
+    <section id="jeux-phares" class="section" aria-labelledby="jeux-title">
+      <div class="section-inner">
+        <h2 id="jeux-title" class="section-title">Jeux phares</h2>
+        <div class="games-grid">
+
+          <!-- Carte 1 : Le Manoir Hurlant -->
+          <article class="game-card">
+            <div class="game-card-image">
+              <span>Aperçu (visuel factice)</span>
+            </div>
+            <div class="game-card-body">
+              <span class="game-card-badge badge-fake">JEU FACTICE</span>
+              <h3>Le Manoir Hurlant</h3>
+              <p>Une soirée à énigmes sur le thème d'un manoir mystérieux où chaque pièce cache un secret.</p>
+              <a href="fiche-jeu.html" class="btn btn-primary" style="width:100%;margin-top:auto;">Voir la fiche</a>
+            </div>
+          </article>
+
+          <!-- Carte 2 : Halloween à venir -->
+          <article class="game-card">
+            <div class="game-card-image" style="background:linear-gradient(135deg, #1B1330 0%, #FF7A29 100%);">
+              <span>Aperçu (visuel factice)</span>
+            </div>
+            <div class="game-card-body">
+              <span class="game-card-badge badge-season">Halloween</span>
+              <h3>Prochain jeu — à venir</h3>
+              <p class="coming-soon">Bientôt disponible</p>
+            </div>
+          </article>
+
+          <!-- Carte 3 : Noël à venir -->
+          <article class="game-card">
+            <div class="game-card-image" style="background:linear-gradient(135deg, #1B1330 0%, #C21F3A 100%);">
+              <span>Aperçu (visuel factice)</span>
+            </div>
+            <div class="game-card-body">
+              <span class="game-card-badge badge-season" style="background:#C21F3A;color:#F5EFE6;">Noël</span>
+              <h3>Prochain jeu — à venir</h3>
+              <p class="coming-soon">Bientôt disponible</p>
+            </div>
+          </article>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== COMMENT ÇA MARCHE ========== -->
+    <section id="comment-ca-marche" class="section" aria-labelledby="how-title">
+      <h2 id="how-title" class="section-title">Comment ça marche</h2>
+      <div class="steps-grid">
+        <div class="step">
+          <div class="step-number">1</div>
+          <h3>Choisissez votre jeu</h3>
+          <p>Parcourez le catalogue et trouvez l'univers qui correspond à votre soirée.</p>
+        </div>
+        <div class="step">
+          <div class="step-number">2</div>
+          <h3>Recevez votre PDF</h3>
+          <p>Après votre commande, le fichier PDF vous est envoyé par email. Téléchargez-le immédiatement.</p>
+        </div>
+        <div class="step">
+          <div class="step-number">3</div>
+          <h3>Imprimez et jouez</h3>
+          <p>Imprimez les documents chez vous ou en librairie, et plongez dans l'aventure avec vos invités.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== NEWSLETTER ========== -->
+    <section id="newsletter" class="section" aria-labelledby="news-title">
+      <div class="section-inner">
+        <div class="newsletter-box">
+          <h2 id="news-title" class="section-title">Soyez prévenu·e des sorties</h2>
+          <p style="color:var(--color-text-muted);font-size:0.9rem;">
+            Inscrivez-vous pour recevoir un email dès qu'un nouveau jeu est disponible.
+          </p>
+          <form class="newsletter-form" onsubmit="return false;">
+            <input type="email" placeholder="votre@email.com" disabled aria-label="Adresse email">
+            <button type="submit" class="btn btn-primary" disabled>Me prévenir</button>
+          </form>
+          <p class="form-note">Aperçu visuel, formulaire non actif</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== SYSTÈME DE COULEURS SAISONNIÈRES (DÉMO) ========== -->
+    <section class="section seasonal-demo" aria-labelledby="seasonal-title">
+      <div class="seasonal-demo-inner" style="text-align:center;">
+        <h2 id="seasonal-title" style="font-family:var(--font-body);font-size:0.85rem;font-weight:600;color:var(--color-text-muted);margin-bottom:0.5rem;">
+          Système de couleurs saisonnières (démonstration)
+        </h2>
+        <div class="season-swatches">
+          <div class="swatch">
+            <div class="swatch-circle halloween"></div>
+            <span>Halloween</span>
+          </div>
+          <div class="swatch">
+            <div class="swatch-circle noel"></div>
+            <span>Noël</span>
+          </div>
+          <div class="swatch">
+            <div class="swatch-circle saint-valentin"></div>
+            <span>St-Valentin</span>
+          </div>
+          <div class="swatch">
+            <div class="swatch-circle paques"></div>
+            <span>Pâques</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ========== FOOTER ========== -->
+  <footer class="site-footer" role="contentinfo">
+    <div class="footer-inner">
+      <div>
+        <span style="font-family:var(--font-heading);font-weight:900;font-size:1rem;color:var(--color-accent);">
+          Le Cabinet des Énigmes
+        </span>
+        <span class="badge-provisoire" style="display:inline-block;">(nom provisoire)</span>
+      </div>
+      <div class="footer-links">
+        <a href="#" title="(page à venir)">Mentions légales</a>
+        <a href="#" title="(page à venir)">CGV</a>
+        <a href="#" title="(page à venir)">Confidentialité</a>
+        <a href="#" title="(page à venir)">Contact</a>
+      </div>
+      <p class="footer-legal-note">&copy; 2026 Le Cabinet des Énigmes (nom provisoire) — Maquette de démonstration</p>
+    </div>
+  </footer>
+
+</body>
+</html>

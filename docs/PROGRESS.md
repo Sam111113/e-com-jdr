@@ -7,7 +7,7 @@
 | T1.1 | Audit du VPS (lecture seule) | Terminée | Agent (données fournies par l'équipe depuis l'hôte) |
 | T1.2 | Plan technique **[VALIDATION ÉQUIPE]** | Terminée, **validée le 15/09 avec amendements** | Agent |
 | T1.3 | Socle technique et staging | À faire (débloquée ; la validation finale attendra le déploiement par l'équipe) | — |
-| T1.4 | Directions visuelles **[VALIDATION ÉQUIPE]** | À faire | — |
+| T1.4 | Directions visuelles **[VALIDATION ÉQUIPE]** | En attente de validation équipe | Agent (branche `t1.4-design`) |
 | T1.5 | Base de données et import des jeux | À faire | — |
 | T1.6 | Pages du site | À faire | — |
 | T1.7 | Interrupteur de vente et configuration légale | À faire | — |
@@ -45,3 +45,35 @@
 - **D12** : table `redirects` prévue dès T1.5 pour les 301 de T1.12.
 - **Lancement en parallèle** de T1.3 (branche `main`), T1.4 (branche `t1.4-design`) et T1.13 (branche `t1.13-seo`), chacune dans son propre worktree Git. L'équipe fusionnera les branches.
 - **Prochaine tâche :** T1.3 (socle technique et staging), en parallèle T1.4 (design) et T1.13 (SEO, sans code).
+
+### 15/09/2026 — Agent (branche `t1.4-design`, worktree `/root/workspace/e-com-jdr-t1.4`)
+- **T1.4** : deux directions visuelles statiques et autonomes (HTML/CSS, sans dépendance au socle
+  Next.js), accueil + fiche jeu, mobile et ordinateur.
+  - `design/direction-a/` (« Mystère chaleureux » : thème sombre, `Playfair Display` + `Inter`)
+    et `design/direction-b/` (« Ludique pop » : thème clair, `Baloo 2` + `Nunito`). Polices
+    Google Fonts (licence OFL) téléchargées et servies localement, aucune image bitmap (formes et
+    dégradés CSS uniquement).
+  - Contenu de démonstration clairement marqué comme factice : marque provisoire « Le Cabinet des
+    Énigmes (nom provisoire) » (section 0 d'AGENTS.md toujours vide) et jeu factice « Le Manoir
+    Hurlant », avec bandeau permanent, badges « JEU FACTICE » et mention « (exemple) » sur chaque
+    caractéristique. Bouton « Me prévenir de la sortie » (pas « Acheter »).
+  - Couleurs d'accent saisonnières en variables CSS `[data-season="…"]` : Halloween et Noël
+    (exigés par la section 5 d'AGENTS.md), Saint-Valentin et Pâques ajoutés en bonus pour couvrir
+    tout le catalogue permanent (section 1).
+  - Contrastes vérifiés (WCAG 2.1, ≥ 4,5:1 pour le texte courant) : un défaut réel a été détecté
+    et corrigé pendant la relecture (badge de saison du hero à 2,52:1 en direction B) — détail
+    complet dans `design/README.md`.
+  - Captures Playwright (Chromium système, `file://`, aucun serveur lancé) : 8 PNG dans
+    `design/captures/` (mobile 390×844 et ordinateur 1440×900 × 2 pages × 2 directions).
+  - Écriture des maquettes déléguée à `worker-code` avec un cadrage détaillé (palette exacte,
+    contenu obligatoire, tokens CSS), puis relue par l'agent (structure, contraste réel des
+    couleurs, contenu factice bien marqué) — un correctif d'accessibilité et un ajustement de
+    dégradé ont été apportés après la relecture.
+  - Outillage de capture (`design/capture.js`, `design/package.json`, Playwright en
+    dépendance non versionnée) scindé du futur `package.json` racine du socle Next.js (T1.3) pour
+    éviter tout conflit de fusion entre les deux branches.
+- **Arrêt demandé par le brief [VALIDATION ÉQUIPE]** : T1.4 est terminée côté agent. En attente
+  du choix de l'équipe entre direction A et B (ou un mélange à préciser) avant de noter la
+  décision dans `docs/DECISIONS.md` — ce qui débloquera T1.6 (pages du site).
+- **Ce qui bloque côté équipe :** choisir une direction visuelle (voir `design/README.md` pour
+  les captures et le détail des deux propositions).
