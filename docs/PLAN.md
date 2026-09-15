@@ -2,7 +2,7 @@
 
 > Créé pour T1.2. Section « Audit » créée pour T1.1.
 >
-> **Validé par l'équipe le 15/09/2026, avec amendements** : ce VPS sert au développement et au staging uniquement (la production aura son propre VPS), staging accessible via Tailscale, numérotation des factures sans rupture, base Postgres et Playwright disponibles dans le conteneur de l'agent. Voir `docs/DECISIONS.md` (D6, D8 à D10).
+> **Validé par l'équipe le 15/09/2026, avec amendements** : ce VPS sert au développement et au staging uniquement (la production aura son propre VPS), staging accessible via Tailscale, numérotation des factures sans rupture, base Postgres et Playwright disponibles dans le conteneur de l'agent, interrupteur `SALES_ENABLED` non contournable, table de redirections 301. Voir `docs/DECISIONS.md` (D6, D8 à D12).
 
 ---
 
@@ -117,7 +117,7 @@ e-com-jdr/
 │   ├── stripe/
 │   ├── email/                   # client Brevo
 │   ├── pdf/                     # filigrane (pdf-lib), génération factures
-│   └── sales-enabled.ts         # helper + garde-fou de build
+│   └── sales-enabled.ts         # valeur figée au build + vérifications (voir D11)
 ├── scripts/
 │   ├── import-games.ts
 │   └── check-legal-config.ts     # garde-fou build prod
@@ -145,6 +145,12 @@ e-com-jdr/
 | `invoices` | id, order_id (FK), series (`facture` / `avoir`), number (int), display_number (ex. `F-000001`), credited_invoice_id (FK nullable : facture annulée par cet avoir), pdf_key (nullable tant que le PDF n'est pas généré), legal_snapshot (json, copie de `config/entreprise.ts` au moment de l'émission), issued_at — **unicité `(series, number)`** | Factures, jamais supprimées ni renumérotées ; un remboursement crée un avoir |
 | `subscriptions` | id, email, type (newsletter / liste_attente / jeu_gratuit), game_id (FK, nullable = liste générale), consent_text, confirmed_at (double opt-in), unsubscribed_at, created_at | Table unique pour newsletter, listes d'attente et jeu gratuit, différenciée par `type` + `game_id` |
 | `admin_users` | id, email, password_hash, created_at | Accès à l'admin minimale (T1.10) |
+| `redirects` | from_path (PK), to_path, created_at | Redirections 301 quand un slug change (jeux, articles, collections) — exigées par T1.12, créées dès T1.5 (décision D12) |
+
+**Règles de `redirects` (D12) :**
+- quand un slug change, on insère `ancien chemin → nouveau chemin` **et** on met à jour les redirections existantes qui pointaient vers l'ancien chemin : **jamais de chaîne** de redirections ;
+- on n'enregistre jamais une redirection depuis un chemin qui correspond à une page existante : **jamais de boucle** ;
+- la détection d'un changement de slug par `import-games` est à proposer dans T1.5. **Le modèle de fiche appartient à l'équipe** : ne pas y ajouter de champ (par exemple un identifiant stable) sans sa validation. Une commande explicite `npm run rename-game <ancien> <nouveau>` est une alternative qui n'y touche pas.
 
 Interface `storage` (dans `lib/storage`) : `put(key, buffer)`, `get(key)`, `delete(key)`, `getPrivateUrl(key, ttl)` — implémentation `LocalDiskStorage` (dossier hors du webroot, ex. `/data/private`) en phase 1-2, remplaçable par une implémentation S3/R2 sans changer le code appelant.
 
@@ -173,8 +179,26 @@ La numérotation doit être chronologique et continue, **sans aucun trou**.
 
 ### `SALES_ENABLED` et configuration légale centralisée
 - `config/entreprise.ts` exporte un objet unique avec toutes les infos légales (nom, statut, SIRET, adresse, régime TVA, médiateur…). Les valeurs provisoires utilisent un marqueur détectable, par ex. `"À COMPLÉTER"`.
-- `lib/sales-enabled.ts` lit `process.env.SALES_ENABLED` (`NEXT_PUBLIC_SALES_ENABLED` côté client pour l'affichage du bouton) : `false` → bouton « Me prévenir de la sortie », routes `/api/checkout`, `/api/webhooks/stripe`, `/api/download/*` renvoient 404.
-- **Garde-fou de build :** `scripts/check-legal-config.ts`, exécuté en `prebuild` (npm script), lève une erreur (exit code ≠ 0) si `SALES_ENABLED=true` **et** qu'au moins une valeur de `config/entreprise.ts` contient encore le marqueur provisoire. Le build de production échoue alors volontairement.
+- `SALES_ENABLED=false` → bouton « Me prévenir de la sortie », routes `/api/checkout`, `/api/webhooks/stripe`, `/api/download/*` renvoient 404.
+
+#### Invariants imposés (décision D11)
+Un garde-fou exécuté **uniquement au build** ne suffit pas. En phase 3, il suffirait de passer `SALES_ENABLED=true` dans le `.env` et de redémarrer, **sans reconstruire**, pour ouvrir les ventes sans que la vérification légale ne s'exécute. Et une valeur figée au build (variable `NEXT_PUBLIC_*`, pages statiques, JSON-LD) peut diverger de la valeur lue au runtime : bouton « Acheter » menant à une 404, ou `InStock` affiché ventes fermées.
+
+1. **Une seule variable, `SALES_ENABLED`, lue côté serveur.** Aucune variable `NEXT_PUBLIC_SALES_ENABLED`.
+2. **La valeur est figée au build.** Le build l'inscrit dans le bundle serveur, et c'est cette valeur qui pilote le bouton, les routes et la disponibilité dans les données structurées. Tout reste donc cohérent, y compris dans les pages statiques.
+3. **Vérification légale au build** (`scripts/check-legal-config.ts` en `prebuild`) : le build échoue si `SALES_ENABLED=true` et qu'une valeur de `config/entreprise.ts` contient encore le marqueur provisoire.
+4. **Vérification au démarrage du serveur** (`instrumentation.ts` ou équivalent) : le serveur **refuse de démarrer**, avec un message explicite, si :
+   - la valeur de `SALES_ENABLED` dans l'environnement diffère de celle du build (« reconstruire le site pour changer SALES_ENABLED ») ;
+   - ou `SALES_ENABLED=true` alors qu'une valeur provisoire subsiste.
+5. **Vérification à chaque création de session Stripe Checkout** : refus si la configuration légale contient une valeur provisoire (défense en profondeur).
+
+Conséquence pour la phase 3 : ouvrir les ventes demande un **rebuild et un redéploiement**, pas un simple changement de `.env`. La section « Ouvrir les ventes » du README (T2.9) devra le dire.
+
+**Tests obligatoires (T1.16) :**
+- `SALES_ENABLED=true` avec une valeur provisoire → le build échoue ;
+- site construit avec `false`, puis environnement passé à `true` → le serveur refuse de démarrer ;
+- création de session Checkout avec une valeur provisoire → refusée ;
+- mode vitrine : bouton, routes et JSON-LD cohérents (aucun `InStock`, aucune route de paiement accessible).
 
 ### Estimation des tâches (en jours-agent, indicatif)
 | Tâche | Estimation | Dépend de |

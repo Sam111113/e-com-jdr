@@ -56,3 +56,13 @@
 *Décidé par l'équipe le 15/09/2026.*
 **Décision :** la marque, le domaine, l'email de contact et le contact de validation restent à compléter plus tard. L'agent utilise des valeurs provisoires clairement marquées. Le dépôt Git distant est confirmé : `github.com/Sam111113/e-com-jdr`.
 **Raison :** le staging ne dépend plus d'un domaine (D6) ; ces informations ne bloquent pas la phase 1.
+
+## D11 — `SALES_ENABLED` : une seule variable, figée au build, revérifiée au démarrage et au paiement
+*Décidé par l'équipe le 15/09/2026. Remplace la partie « garde-fou » de D4.*
+**Décision :** une seule variable `SALES_ENABLED`, lue côté serveur, sans `NEXT_PUBLIC_*`. Sa valeur est figée au build et pilote le bouton, les routes et le JSON-LD. La configuration légale est vérifiée au build, au démarrage du serveur (qui refuse aussi de démarrer si l'environnement diffère de la valeur du build) et à chaque création de session Checkout. Détail et tests : `docs/PLAN.md`, section « `SALES_ENABLED` ».
+**Raison :** avec un garde-fou au build seulement, changer `.env` et redémarrer suffisait à ouvrir les ventes sans vérification légale. Une valeur mixte (figée au build pour l'affichage, lue au runtime pour les routes) pouvait aussi afficher « Acheter » vers une 404. Ouvrir les ventes demandera un rebuild, ce qui reste compatible avec l'objectif de moins de 48 h.
+
+## D12 — Table `redirects` prévue dès le schéma initial
+*Décidé par l'équipe le 15/09/2026.*
+**Décision :** table `redirects (from_path, to_path)` créée en T1.5, sans chaîne ni boucle de redirections. Le mécanisme de détection d'un changement de slug est proposé en T1.5, sans modifier le modèle de fiche de l'équipe sans sa validation.
+**Raison :** T1.12 exige une redirection 301 automatique quand un slug change. La prévoir dès le schéma initial évite une migration plus tard et protège le référencement des pages déjà indexées.

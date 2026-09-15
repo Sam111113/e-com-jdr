@@ -41,4 +41,7 @@
   - **D9** : PostgreSQL 18 et Chromium installés dans le conteneur de l'agent. Test E2E Playwright vérifié.
   - **D10** : section 0 d'`AGENTS.md` laissée provisoire, dépôt Git confirmé.
 - `AGENTS.md` section 8 mise à jour en conséquence.
+- **D11** : `SALES_ENABLED` figée au build et revérifiée au démarrage et à chaque paiement (le garde-fou au build seul était contournable).
+- **D12** : table `redirects` prévue dès T1.5 pour les 301 de T1.12.
+- **Lancement en parallèle** de T1.3 (branche `main`), T1.4 (branche `t1.4-design`) et T1.13 (branche `t1.13-seo`), chacune dans son propre worktree Git. L'équipe fusionnera les branches.
 - **Prochaine tâche :** T1.3 (socle technique et staging), en parallèle T1.4 (design) et T1.13 (SEO, sans code).
