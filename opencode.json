@@ -1,0 +1,19 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "permission": {
+    "bash": {
+      "*": "allow",
+      "sudo *": "ask",
+      "rm -rf *": "ask",
+      "ufw *": "ask",
+      "iptables *": "ask",
+      "systemctl *": "ask",
+      "git push *": "ask",
+      "docker volume rm *": "ask",
+      "docker system prune*": "ask",
+      "docker compose down -v*": "ask",
+      "*DROP DATABASE*": "ask",
+      "*DROP TABLE*": "ask"
+    }
+  }
+}
