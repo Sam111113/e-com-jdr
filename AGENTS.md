@@ -164,6 +164,7 @@ Tu peux proposer mieux dans `docs/PLAN.md`, en justifiant.
 - **Qualité plutôt que quantité :** 2 à 3 articles utiles par semaine, jamais de contenu creux.
 - **Contenu fiable :** aucune information de jeu inventée, aucune donnée structurée mensongère (disponibilité, avis).
 - **Staging jamais indexable :** `noindex` **et** mot de passe.
+- **Ton éditorial (validé le 15/09/2026) :** ludique mais classe et professionnel, vouvoiement, sans répétitions. Aucune durée, préparation ou accessoire précis pour les jeux : c'est le créateur des jeux qui les fixe. Avant de rédiger quoi que ce soit, charge le skill `redaction-ecomjdr`.
 
 ---
 
@@ -171,7 +172,8 @@ Tu peux proposer mieux dans `docs/PLAN.md`, en justifiant.
 
 - **Base et secrets :**
   - Postgres **jamais exposé** sur Internet ;
-  - secrets dans `.env` avec les droits 600.
+  - secrets dans `.env` avec les droits 600 ;
+  - **les kits PDF (`kit.pdf`) sont les produits vendus** : jamais commités (ils sont dans `.gitignore`), jamais servis en statique. `npm run import-games` les déplace dans le stockage privé.
 - **Protection du site :**
   - en-têtes de sécurité (CSP, HSTS…) ;
   - dépendances à jour ;

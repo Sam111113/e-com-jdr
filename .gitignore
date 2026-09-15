@@ -52,6 +52,11 @@ next-env.d.ts
 content/games/*/kit.pdf
 !content/games/jeu-factice-*/kit.pdf
 
+# OpenCode : seules les skills du projet sont versionnées (OpenCode crée de
+# lui-même package.json et node_modules dans ce dossier).
+.opencode/*
+!.opencode/skills/
+
 # éditeurs
 .vscode/*
 !.vscode/extensions.json
