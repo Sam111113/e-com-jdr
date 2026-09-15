@@ -6,8 +6,8 @@
 |---|---|---|---|
 | T1.1 | Audit du VPS (lecture seule) | Terminée | Agent (données fournies par l'équipe depuis l'hôte) |
 | T1.2 | Plan technique **[VALIDATION ÉQUIPE]** | Terminée, **validée le 15/09 avec amendements** | Agent |
-| T1.3 | Socle technique et staging | En attente de déploiement par l'équipe (code prêt, testé dans le conteneur de l'agent) | Agent (worktree `main`, port 3100) |
-| T1.4 | Directions visuelles **[VALIDATION ÉQUIPE]** | À faire | — |
+| T1.3 | Socle technique et staging | **Terminée — déployée et vérifiée par l'équipe le 15/09** (`https://srv1214588.taild2e4d0.ts.net:8444`, tailnet uniquement) | Agent (worktree `main`, port 3100) |
+| T1.4 | Directions visuelles **[VALIDATION ÉQUIPE]** | **Terminée — direction B choisie le 15/09, avec thème sombre automatique en plus (D14)** | Agent (branche `t1.4-design`, fusionnée) |
 | T1.5 | Base de données et import des jeux | À faire | — |
 | T1.6 | Pages du site | À faire | — |
 | T1.7 | Interrupteur de vente et configuration légale | À faire | — |
@@ -16,7 +16,7 @@
 | T1.10 | Admin minimale | À faire | — |
 | T1.11 | Brouillons des pages légales | À faire | — |
 | T1.12 | SEO technique | À faire | — |
-| T1.13 | Mots-clés et calendrier éditorial | À faire | — |
+| T1.13 | Mots-clés et calendrier éditorial | Livrée sur la branche `t1.13-seo`, **non fusionnée** : 3 articles en attente de validation de l'équipe, et recherche à compléter pour les chasses au trésor (D15) | Agent (branche `t1.13-seo`) |
 | T1.14 | Statistiques de visite | À faire | — |
 | T1.15 | Sécurité, sauvegardes, surveillance | À faire | — |
 | T1.16 | Tests automatisés | À faire | — |
@@ -57,3 +57,54 @@
 - **T1.3 marquée « en attente de déploiement par l'équipe »**, pas terminée : conformément à AGENTS.md section 8, l'agent ne peut pas exécuter `docker compose` ni `tailscale serve` lui-même. **Ce qui bloque :** l'équipe doit exécuter la procédure du README sur l'hôte, puis confirmer que `https://srv1214588.taild2e4d0.ts.net:8444` répond (401 sans mot de passe, 200 avec) depuis un appareil du tailnet.
 - **Ce qui reste (autres tâches, hors périmètre T1.3)** : T1.5 (base de données, dépend de T1.3 — peut démarrer dès que le code est mergé, sans attendre le déploiement), T1.14 et T1.15 dépendent en revanche du **déploiement réel** du staging.
 - **Rappel :** travail réalisé uniquement dans ce worktree (`main`, port 3100), sans toucher aux autres worktrees (T1.4, T1.13). Pas de push, pas de fusion.
+
+### 15/09/2026 — Agent (branche `t1.4-design`, worktree `/root/workspace/e-com-jdr-t1.4`)
+- **T1.4** : deux directions visuelles statiques et autonomes (HTML/CSS, sans dépendance au socle
+  Next.js), accueil + fiche jeu, mobile et ordinateur.
+  - `design/direction-a/` (« Mystère chaleureux » : thème sombre, `Playfair Display` + `Inter`)
+    et `design/direction-b/` (« Ludique pop » : thème clair, `Baloo 2` + `Nunito`). Polices
+    Google Fonts (licence OFL) téléchargées et servies localement, aucune image bitmap (formes et
+    dégradés CSS uniquement).
+  - Contenu de démonstration clairement marqué comme factice : marque provisoire « Le Cabinet des
+    Énigmes (nom provisoire) » (section 0 d'AGENTS.md toujours vide) et jeu factice « Le Manoir
+    Hurlant », avec bandeau permanent, badges « JEU FACTICE » et mention « (exemple) » sur chaque
+    caractéristique. Bouton « Me prévenir de la sortie » (pas « Acheter »).
+  - Couleurs d'accent saisonnières en variables CSS `[data-season="…"]` : Halloween et Noël
+    (exigés par la section 5 d'AGENTS.md), Saint-Valentin et Pâques ajoutés en bonus pour couvrir
+    tout le catalogue permanent (section 1).
+  - Contrastes vérifiés (WCAG 2.1, ≥ 4,5:1 pour le texte courant) : un défaut réel a été détecté
+    et corrigé pendant la relecture (badge de saison du hero à 2,52:1 en direction B) — détail
+    complet dans `design/README.md`.
+  - Captures Playwright (Chromium système, `file://`, aucun serveur lancé) : 8 PNG dans
+    `design/captures/` (mobile 390×844 et ordinateur 1440×900 × 2 pages × 2 directions).
+  - Écriture des maquettes déléguée à `worker-code` avec un cadrage détaillé (palette exacte,
+    contenu obligatoire, tokens CSS), puis relue par l'agent (structure, contraste réel des
+    couleurs, contenu factice bien marqué) — un correctif d'accessibilité et un ajustement de
+    dégradé ont été apportés après la relecture.
+  - Outillage de capture (`design/capture.js`, `design/package.json`, Playwright en
+    dépendance non versionnée) scindé du futur `package.json` racine du socle Next.js (T1.3) pour
+    éviter tout conflit de fusion entre les deux branches.
+- **Arrêt demandé par le brief [VALIDATION ÉQUIPE]** : T1.4 est terminée côté agent. En attente
+  du choix de l'équipe entre direction A et B (ou un mélange à préciser) avant de noter la
+  décision dans `docs/DECISIONS.md` — ce qui débloquera T1.6 (pages du site).
+- **Ce qui bloque côté équipe :** choisir une direction visuelle (voir `design/README.md` pour
+  les captures et le détail des deux propositions).
+
+### 15/09/2026 — Équipe (relecture des trois livrables)
+- **T1.13** relue : conforme (aucun volume de recherche inventé, sources citées, slugs permanents, articles sans jeu ni statistique inventés). Branche `t1.13-seo` **non fusionnée** : les 3 articles attendent la validation de l'équipe, et la recherche doit être complétée pour les chasses au trésor (D15).
+- **T1.4 validée : direction B** (« Ludique pop »), **avec un thème sombre automatique en plus** (D14). Branche `t1.4-design` fusionnée dans `main`. Défaut relevé sur les deux maquettes, à corriger lors de l'intégration en T1.6 : **sur ordinateur, la navigation passe sous le logo et se colle au bord gauche de l'écran**. L'agent ne l'a pas vu car il relisait des captures pleine page (2880 × 4700 px), illisibles une fois réduites : relire aussi des captures à la taille de l'écran.
+- **D15 : types de jeu élargis** : escape games, **chasses au trésor**, et d'autres types possibles plus tard. **Thème prioritaire : Halloween.** Champ `type` ajouté au modèle de fiche (T1.5).
+- **T1.3 relue et testée par l'équipe** : build, mot de passe, `noindex` et fail-closed confirmés. **Cinq défauts de déploiement** trouvés (l'agent n'a pas Docker) et corrigés dans le commit `a0a9635` :
+  1. `postgres:18` refusait de démarrer (volume monté sur l'ancien chemin `/var/lib/postgresql/data`) ;
+  2. commandes du README sans `--env-file .env` (échec d'interpolation) ;
+  3. absence de `.dockerignore` (le `.env` réel partait dans le build) ;
+  4. clonage depuis GitHub impossible sur l'hôte (dépôt privé, pas d'identifiants) : clone local vers `/root/apps/e-com-jdr-staging` ;
+  5. nom de projet Compose implicite (« docker ») : `name: ecomjdr`.
+- **Staging déployé par l'équipe** depuis `/root/apps/e-com-jdr-staging` (clone du dépôt local, `.env` en 600 hors de portée des agents). Vérifications :
+  - image sans `.env`, exécutée en utilisateur non privilégié ;
+  - Postgres 18 démarré, **données bien dans le volume nommé** `ecomjdr_postgres_data` ;
+  - base Umami créée, migrations appliquées, heartbeat 200 ;
+  - via le tailnet : 401 sans mot de passe, 200 avec, certificat HTTPS valide, `X-Robots-Tag: noindex`, `robots.txt` servi ;
+  - OpenCode (`:8443`) et n8n intacts.
+- **T1.3 terminée.** Débloque T1.5, T1.14 et T1.15.
+- **Prochaines tâches possibles :** T1.5 (base de données et import, avec le champ `type` de D15), T1.6 (pages, direction B + thème sombre), révision de T1.13 pour les chasses au trésor.
