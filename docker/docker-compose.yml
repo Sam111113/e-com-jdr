@@ -1,0 +1,66 @@
+# Socle technique du staging (T1.3). Commun au staging et à la production
+# (docker-compose.prod.yml, à venir, ajoutera seulement Caddy).
+#
+# Rappels de sécurité (AGENTS.md sections 7 et 8, décision D2, D6) :
+#   - Postgres ne publie AUCUN port sur l'hôte.
+#   - Aucun service ici ne rejoint le réseau `n8n_default` : réseau dédié
+#     `ecomjdr_default` uniquement.
+#   - Sur ce VPS de développement, seuls 127.0.0.1:3000 (app) et
+#     127.0.0.1:3001 (Umami) sont publiés ; l'accès HTTPS externe passe par
+#     `tailscale serve` sur l'hôte (voir README), jamais par un port public.
+
+services:
+  app:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    image: ecomjdr-app:latest
+    restart: unless-stopped
+    env_file:
+      - ../.env
+    ports:
+      - "127.0.0.1:3000:3000"
+    depends_on:
+      - postgres
+    networks:
+      - ecomjdr
+    volumes:
+      - private_storage:/data/private
+
+  postgres:
+    image: postgres:18
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-ecomjdr}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD manquant dans .env}
+      POSTGRES_DB: ${POSTGRES_DB:-ecomjdr}
+      UMAMI_POSTGRES_DB: ${UMAMI_POSTGRES_DB:-umami}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./postgres-init:/docker-entrypoint-initdb.d:ro
+    networks:
+      - ecomjdr
+    # Volontairement aucun `ports:` ici : Postgres n'est jamais exposé,
+    # ni sur l'hôte ni sur Internet (décision D2).
+
+  umami:
+    image: ghcr.io/umami-software/umami:postgresql-latest
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: ${UMAMI_DATABASE_URL:?UMAMI_DATABASE_URL manquant dans .env}
+      APP_SECRET: ${UMAMI_APP_SECRET:?UMAMI_APP_SECRET manquant dans .env}
+    ports:
+      - "127.0.0.1:3001:3000"
+    depends_on:
+      - postgres
+    networks:
+      - ecomjdr
+
+networks:
+  ecomjdr:
+    name: ecomjdr_default
+    # Réseau interne au projet uniquement : jamais relié à n8n_default.
+
+volumes:
+  postgres_data:
+  private_storage:
