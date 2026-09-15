@@ -16,7 +16,7 @@
 | T1.10 | Admin minimale | À faire | — |
 | T1.11 | Brouillons des pages légales | À faire | — |
 | T1.12 | SEO technique | À faire | — |
-| T1.13 | Mots-clés et calendrier éditorial | Livrée sur la branche `t1.13-seo`, **non fusionnée** : 3 articles en attente de validation de l'équipe, et recherche à compléter pour les chasses au trésor (D15) | Agent (branche `t1.13-seo`) |
+| T1.13 | Mots-clés et calendrier éditorial | **Structure validée le 15/09 (D17) ; 3 articles réécrits par l'équipe, en attente du feu vert final avant publication** | Agent, articles réécrits par l'équipe |
 | T1.14 | Statistiques de visite | À faire | — |
 | T1.15 | Sécurité, sauvegardes, surveillance | À faire | — |
 | T1.16 | Tests automatisés | À faire | — |
@@ -119,3 +119,24 @@
 - **Ajouts de l'équipe** : service Compose `tools` (migrations et import sur le staging, cité par `db/migrate.ts` mais inexistant), propriétaire du volume privé donné à l'utilisateur de l'app (sinon aucune écriture possible, bloquant pour T1.8), `design/` exclu du lint, procédure « Ajouter un jeu » et « Base de données » dans le README.
 - **Vérifié sur le staging** : 9 tables créées, compteurs de factures à 0, jeu factice importé, kit lisible par l'app et **non servi publiquement** (404), images servies, migrations et import relançables sans doublon. 42 tests unitaires, lint, TypeScript et build au vert.
 - **T1.5 terminée.** Débloque T1.6.
+
+### 15/09/2026 — Agent (branche `t1.13-seo`, révision D15)
+- **Aucun code.** Révision de T1.13 après D15 (types de jeu élargis, Halloween prioritaire), dans `docs/seo/mots-cles.md` et `docs/seo/calendrier.md`. Les 3 articles de `content/blog/` **non modifiés** (attendent toujours la validation de l'équipe).
+- **Recherche de mots-clés « chasse au trésor » complétée**, priorité Halloween (`docs/seo/mots-cles.md`, section 2bis) :
+  - une première collecte déléguée à `worker-web` a été **écartée** : son rapport contenait des noms de domaine visiblement corrompus/invérifiables (« momèspares », « jeuxEtCarre.fr »…), incompatibles avec l'exigence de sources vérifiables ;
+  - l'agent a **refait la collecte lui-même** en interrogeant directement DuckDuckGo (autocomplétion + recherche HTML) : 7 familles de requêtes documentées, 14 concurrents réels identifiés (noms de domaine + thème observé, jamais de texte recopié), 3 domaines communs avec la recherche escape game déjà livrée ;
+  - **aucun volume de recherche inventé** ; chaque observation cite sa source exacte ; les requêtes bloquées par un captcha ou infructueuses sur Bing sont signalées explicitement (limites en section 2bis.6), notamment pour « chasse au trésor anniversaire enfant » (donnée partielle, mise en « watch-list ») et pour Noël/Saint-Valentin/Pâques/anniversaire ado/EVJF-EVG (recherche chasse au trésor pas faite, hors périmètre de cette révision).
+- **Nouvelle structure de pages collections proposée** (`docs/seo/mots-cles.md`, section 1bis), en réponse directe à D15 : principe hub (page saison/public qui regroupe tous les types) + pages type (créées seulement quand une requête dédiée et des concurrents réels le justifient). Concrètement : nouveau hub `/halloween` + nouvelle page type `/chasse-au-tresor-halloween` (données complètes) à côté de `/escape-game-halloween` (inchangée) ; renommage en hubs de `/escape-game-noel` → `/noel`, `/escape-game-saint-valentin` → `/saint-valentin`, `/escape-game-paques` → `/paques`, `/escape-game-anniversaire-enfant` → `/anniversaire-enfant`, `/escape-game-anniversaire-ado` → `/anniversaire-ado`, `/escape-game-evjf-evg` → `/evjf-evg` ; nouveau hub `/soiree-adulte` au-dessus de `/murder-party-a-imprimer` (conservé tel quel). Rien n'est supprimé, aucune redirection nécessaire (T1.6 n'a pas commencé). **La proposition initiale (section 1) est conservée pour mémoire, marquée remplacée.**
+- **`docs/seo/calendrier.md` mis à jour :** Halloween reste prioritaire (7 lignes sur 15 dans le calendrier détaillé S1-S7, contre 6 sur 14 avant cette révision) ; ligne ajoutée en S2 pour un **futur article chasse au trésor Halloween, planifié mais non rédigé** (ne remplace ni ne modifie les 3 articles déjà livrés) ; date de Pâques 2027 mise à jour : **dimanche 28/03/2027, confirmée par l'équipe** (remplace la mention « à reconfirmer »).
+- **Réalisme SEO rappelé explicitement** (AGENTS.md section 6) dans les deux fichiers : domaine neuf, vitrine publique vers le 30/09/2026 → les pages Halloween visent surtout **Halloween 2027**, pas 2026.
+- **T1.13 marquée « révisée, en attente de validation équipe » dans le tableau ci-dessus** (structure des collections en section 1bis + les 3 articles, comme avant cette révision).
+- **Ce qui bloque côté équipe :** valider (ou amender) la nouvelle structure de pages collections (section 1bis de `mots-cles.md`) avant que T1.6 ne l'implémente ; valider (ou amender) les 3 articles de blog (inchangés depuis la première livraison).
+- **Ce qui reste, hors périmètre de cette révision :** recherche « chasse au trésor » pour Noël, Saint-Valentin, Pâques, anniversaire ado et EVJF/EVG ; confirmation de la page type `/chasse-au-tresor-anniversaire-enfant` (données partielles actuellement) ; vérification des concurrents sur les requêtes ombrelles des hubs.
+- **Rappel :** session sans code, travail limité à ce worktree (`t1.13-seo`), aucune modification des autres dossiers/branches.
+
+### 15/09/2026 — Équipe (validation de T1.13)
+- **Structure des pages collections validée telle quelle** (D17), pages `/soiree-adulte` et `/murder-party-a-imprimer` comprises : la murder party est un type de jeu confirmé.
+- **Concurrents vérifiés par l'équipe** : les 14 domaines cités dans la structure existent (DNS résolu, 13 répondent en HTTPS).
+- **`worker-web` peu fiable pour la collecte factuelle** : sa première collecte contenait des noms de domaine inventés. L'agent l'a écartée et a refait la recherche lui-même, ce qui explique une partie du coût de la révision (1,78 $). Toute source rapportée par un worker doit être vérifiée avant usage.
+- **Articles réécrits par l'équipe** après son retour sur le ton : ludique mais classe et professionnel, aucune durée ni matériel de jeu précis (ils relèvent du créateur des jeux), un seul renvoi à la fiche du jeu par article, aucune date dans le texte, liens vers les pages de la structure validée. Article 2 élargi aux chasses au trésor d'Halloween et renommé `organiser-escape-game-chasse-au-tresor-halloween.md` (jamais publié). Dates de publication prévues : 30/09, 02/10 et 07/10, sous réserve de l'ouverture de la vitrine.
+- **Reste à faire :** feu vert final de l'équipe sur les 3 articles ; recherche « chasse au trésor » pour les autres saisons (non bloquant). **T1.6 peut démarrer.**
