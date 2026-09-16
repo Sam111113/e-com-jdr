@@ -10,13 +10,18 @@ import {
   TYPES_CONFIRMES,
 } from "@/lib/games/format";
 import { listerJeux } from "@/lib/games/queries";
+import { metadonneesPage } from "@/lib/seo/meta";
 import { SAISONS } from "@/lib/saisons";
 
-export const metadata: Metadata = {
-  title: "Tous les jeux à imprimer",
+// Canonical fixe sur /jeux quels que soient les filtres actifs : ce sont des
+// vues différentes du même catalogue, pas des pages distinctes à indexer
+// séparément.
+export const metadata: Metadata = metadonneesPage({
+  titre: "Tous les jeux à imprimer",
   description:
     "Le catalogue complet : escape games, chasses au trésor et murder parties à imprimer, à filtrer selon l'âge, le nombre de joueurs et la durée.",
-};
+  chemin: "/jeux",
+});
 
 export default async function Catalogue({ searchParams }: PageProps<"/jeux">) {
   const filtres = lireFiltresCatalogue(await searchParams);
@@ -26,7 +31,7 @@ export default async function Catalogue({ searchParams }: PageProps<"/jeux">) {
 
   return (
     <>
-      <FilAriane etapes={[{ libelle: "Tous les jeux" }]} />
+      <FilAriane etapes={[{ libelle: "Tous les jeux" }]} cheminCourant="/jeux" />
       <div className="conteneur en-tete-page">
         <h1>Tous les jeux</h1>
         <p>

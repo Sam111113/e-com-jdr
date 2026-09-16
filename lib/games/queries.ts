@@ -95,3 +95,16 @@ export async function jeuxSimilaires(jeu: Jeu, limite = 3): Promise<Jeu[]> {
 export function apercusDuJeu(jeu: Jeu): Apercu[] {
   return Array.isArray(jeu.apercuPaths) ? (jeu.apercuPaths as Apercu[]) : [];
 }
+
+/**
+ * Pour le sitemap (T1.12) : toujours les seuls jeux publiés, même sur le
+ * staging avec `AFFICHER_BROUILLONS=true` (le sitemap ne doit jamais
+ * proposer un jeu factice ou en brouillon à l'indexation).
+ */
+export async function listerJeuxPublies(): Promise<Pick<Jeu, "slug" | "updatedAt">[]> {
+  const db = await ouvrirBase();
+  return db
+    .select({ slug: games.slug, updatedAt: games.updatedAt })
+    .from(games)
+    .where(eq(games.status, "publie"));
+}

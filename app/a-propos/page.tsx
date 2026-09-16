@@ -2,17 +2,19 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { FilAriane } from "@/components/site/FilAriane";
 import { site } from "@/config/site";
+import { metadonneesPage } from "@/lib/seo/meta";
 
-export const metadata: Metadata = {
-  title: "À propos",
+export const metadata: Metadata = metadonneesPage({
+  titre: "À propos",
   description: `Qui se cache derrière ${site.nom} : une petite équipe française qui crée des jeux à imprimer pour des soirées pleines de mystère.`,
-};
+  chemin: "/a-propos",
+});
 
 // Contenu provisoire (T1.6) : à remplacer par le texte de l'équipe.
 export default function APropos() {
   return (
     <>
-      <FilAriane etapes={[{ libelle: "À propos" }]} />
+      <FilAriane etapes={[{ libelle: "À propos" }]} cheminCourant="/a-propos" />
       <div className="conteneur-etroit en-tete-page">
         <p className="provisoire">
           Contenu provisoire : cette page attend le texte de présentation de l&apos;équipe.

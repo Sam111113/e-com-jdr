@@ -2,17 +2,22 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { EtapesCommentCaMarche } from "@/components/site/EtapesCommentCaMarche";
 import { FilAriane } from "@/components/site/FilAriane";
+import { metadonneesPage } from "@/lib/seo/meta";
 
-export const metadata: Metadata = {
-  title: "Comment ça marche",
+export const metadata: Metadata = metadonneesPage({
+  titre: "Comment ça marche",
   description:
     "Choisir son jeu, recevoir son kit PDF, l'imprimer et jouer : tout ce qu'il faut savoir avant d'organiser votre soirée à énigmes.",
-};
+  chemin: "/comment-ca-marche",
+});
 
 export default function CommentCaMarche() {
   return (
     <>
-      <FilAriane etapes={[{ libelle: "Comment ça marche" }]} />
+      <FilAriane
+        etapes={[{ libelle: "Comment ça marche" }]}
+        cheminCourant="/comment-ca-marche"
+      />
       <div className="conteneur en-tete-page">
         <h1>Comment ça marche</h1>
         <p>

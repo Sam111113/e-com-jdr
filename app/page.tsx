@@ -1,9 +1,20 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { GrilleJeux } from "@/components/jeux/GrilleJeux";
 import { EncartEmail } from "@/components/site/EncartEmail";
 import { EtapesCommentCaMarche } from "@/components/site/EtapesCommentCaMarche";
+import { site } from "@/config/site";
 import { listerJeux } from "@/lib/games/queries";
+import { metadonneesPage } from "@/lib/seo/meta";
 import { SAISONS, saisonActive } from "@/lib/saisons";
+
+// Reprend le titre/description par défaut de app/layout.tsx : uniquement
+// pour obtenir le canonical et l'Open Graph, absents d'un simple héritage.
+export const metadata: Metadata = metadonneesPage({
+  titre: `${site.nom} : jeux à imprimer`,
+  description: site.description,
+  chemin: "/",
+});
 
 export default async function Accueil() {
   const saison = saisonActive();

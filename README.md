@@ -167,6 +167,33 @@ SALES_ENABLED=true npm run prebuild
 `AFFICHER_PRIX` (affichage des prix) est un réglage cosmétique séparé, sans
 lien avec `SALES_ENABLED` : celui-là peut changer sans reconstruire.
 
+## SEO technique (T1.12)
+
+- `SITE_URL` : base des URLs absolues (canonical, Open Graph, JSON-LD). À
+  définir avec le domaine définitif avant la mise en ligne publique.
+- `SITE_PUBLIC` : indexation par les moteurs de recherche. Contrairement à
+  `SALES_ENABLED`, lue directement au runtime (D20) — mais ne change rien
+  tant que `proxy.ts` protège encore le staging par mot de passe (D13) :
+  retirer cette protection est le rôle de T2.4 (mise en ligne publique).
+- `app/robots.ts` et `app/sitemap.ts` (remplacent l'ancien
+  `public/robots.txt` statique) : `Disallow: /` tant que `SITE_PUBLIC` n'est
+  pas `true`.
+- Le sitemap ne liste que les jeux **publiés** (`listerJeuxPublies`), jamais
+  un brouillon ni le jeu factice, même sur le staging.
+- Redirections 301/308 automatiques quand un slug change (`scripts/rename-game.ts`
+  écrit dans la table `redirects`, D12 ; `lib/redirects.ts` la consulte
+  depuis `app/jeux/[slug]/page.tsx` et `app/[collection]/page.tsx` avant de
+  renvoyer une 404). Next.js utilise `permanentRedirect()`, qui répond en
+  **308** (équivalent moderne du 301, méthode HTTP préservée) — identique
+  pour le SEO.
+- Données structurées JSON-LD : `Organization`/`WebSite` sur toutes les
+  pages (`app/layout.tsx`), `BreadcrumbList` partout où `FilAriane`
+  apparaît, `Product`/`Offer` sur les fiches jeux — disponibilité
+  `PreOrder` tant que `SALES_ENABLED=false`, jamais `InStock` avant
+  l'ouverture réelle des ventes. Le staging étant protégé, valider les
+  données avec l'outil de test des résultats enrichis de Google se fait en
+  mode « coller le code source de la page », pas en collant l'URL.
+
 ## Déploiement du staging (exécuté par l'équipe sur l'hôte du VPS)
 
 L'agent écrit les fichiers et les commandes ; **l'équipe les exécute** (voir

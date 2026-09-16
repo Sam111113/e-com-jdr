@@ -1,10 +1,14 @@
 import type { Metadata, Viewport } from "next";
 import { Baloo_2, Nunito } from "next/font/google";
 import { connection } from "next/server";
+import { JsonLd } from "@/components/site/JsonLd";
 import { EnTete } from "@/components/site/EnTete";
 import { PiedDePage } from "@/components/site/PiedDePage";
 import { site } from "@/config/site";
 import { saisonActive } from "@/lib/saisons";
+import { siteIndexable } from "@/lib/seo/indexation";
+import { organisationEtSiteJsonLd } from "@/lib/seo/jsonld";
+import { baseUrl } from "@/lib/seo/site-url";
 import "./globals.css";
 
 const baloo = Baloo_2({
@@ -20,24 +24,32 @@ const nunito = Nunito({
   display: "swap",
 });
 
-// Staging privé (T1.3, AGENTS.md sections 6 et 8) : jamais indexable, en plus
-// du mot de passe posé par proxy.ts et de l'en-tête X-Robots-Tag. Les réglages
-// d'indexation de la production relèvent de T1.12.
+// Indexation pilotée par SITE_PUBLIC (T1.12, lib/seo/indexation.ts), tant
+// qu'elle reste à false (tout le long de la phase 1) le site n'est de toute
+// façon accessible que derrière le mot de passe de proxy.ts, qui impose en
+// plus un en-tête X-Robots-Tag sur chaque réponse quel que soit ce réglage
+// (D13) : retirer cette double protection est le rôle de T2.4 (mise en ligne
+// publique), pas de T1.12.
+const indexable = siteIndexable();
+
 export const metadata: Metadata = {
+  metadataBase: baseUrl(),
   title: {
     default: `${site.nom} : jeux à imprimer`,
     template: `%s | ${site.nom}`,
   },
   description: site.description,
-  robots: {
-    index: false,
-    follow: false,
-    nocache: true,
-    googleBot: {
-      index: false,
-      follow: false,
-    },
-  },
+  robots: indexable
+    ? { index: true, follow: true }
+    : {
+        index: false,
+        follow: false,
+        nocache: true,
+        googleBot: {
+          index: false,
+          follow: false,
+        },
+      },
 };
 
 export const viewport: Viewport = {
@@ -60,6 +72,9 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
       className={`${baloo.variable} ${nunito.variable} antialiased`}
     >
       <body>
+        {organisationEtSiteJsonLd().map((donnees) => (
+          <JsonLd key={donnees["@type"]} data={donnees} />
+        ))}
         <a href="#contenu" className="lien-evitement">
           Aller au contenu
         </a>

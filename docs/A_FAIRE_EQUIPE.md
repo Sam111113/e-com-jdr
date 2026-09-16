@@ -21,6 +21,7 @@
 - [x] **Feu vert donné aux 3 articles réécrits** (`content/blog/`) : plus rien ne bloque leur publication le moment venu (reste soumise à l'ouverture de la vitrine, phase 2).
 - [x] **Pages du site livrées** (T1.6) : accueil, catalogue filtrable, fiche jeu, pages collections (D17), pages annexes. Détail dans `docs/PROGRESS.md`.
 - [x] **Interrupteur de vente en place** (T1.7) : `config/entreprise.ts` centralise désormais toutes les infos légales à compléter (voir ligne juste en dessous). Le bouton « Acheter » ne s'activera qu'une fois ces champs remplis **et** le site reconstruit (`SALES_ENABLED=true`) — un simple `.env` ne suffit pas (D11, D19), volontairement.
+- [x] **SEO technique en place** (T1.12) : sitemap, robots.txt, canonical, Open Graph/Twitter Card, données structurées (JSON-LD), redirections automatiques quand un slug change. Rien à indexer avant `T2.4` (mise en ligne publique) : le staging reste protégé par mot de passe (D13, D20).
 
 ## Pour chaque nouveau jeu (créateur des jeux)
 

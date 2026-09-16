@@ -2,23 +2,38 @@
 // Toute adresse absente de lib/collections.ts renvoie une 404.
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import { GrilleJeux } from "@/components/jeux/GrilleJeux";
 import { FilAriane } from "@/components/site/FilAriane";
 import { pagesTypeDuHub, trouverPageCollection } from "@/lib/collections";
 import { listerJeux } from "@/lib/games/queries";
+import { trouverRedirection } from "@/lib/redirects";
+import { metadonneesPage } from "@/lib/seo/meta";
 
 export async function generateMetadata({
   params,
 }: PageProps<"/[collection]">): Promise<Metadata> {
   const page = trouverPageCollection((await params).collection);
   if (!page) return {};
-  return { title: { absolute: page.titreSeo }, description: page.description };
+  return {
+    ...metadonneesPage({
+      titre: page.titreSeo,
+      description: page.description,
+      chemin: `/${page.slug}`,
+    }),
+    // titreSeo est déjà une phrase complète : pas de suffixe "| nom du site".
+    title: { absolute: page.titreSeo },
+  };
 }
 
 export default async function PageCollection({ params }: PageProps<"/[collection]">) {
-  const page = trouverPageCollection((await params).collection);
-  if (!page) notFound();
+  const { collection } = await params;
+  const page = trouverPageCollection(collection);
+  if (!page) {
+    const cible = await trouverRedirection(`/${collection}`);
+    if (cible) permanentRedirect(cible);
+    notFound();
+  }
 
   const parent = page.parent ? trouverPageCollection(page.parent) : undefined;
   const sousPages = pagesTypeDuHub(page.slug);
@@ -31,6 +46,7 @@ export default async function PageCollection({ params }: PageProps<"/[collection
           ...(parent ? [{ libelle: parent.titre, href: `/${parent.slug}` }] : []),
           { libelle: page.titre },
         ]}
+        cheminCourant={`/${page.slug}`}
       />
       <div className="conteneur en-tete-page">
         <h1>{page.titre}</h1>

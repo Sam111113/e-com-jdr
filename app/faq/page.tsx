@@ -2,12 +2,14 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { FilAriane } from "@/components/site/FilAriane";
+import { metadonneesPage } from "@/lib/seo/meta";
 
-export const metadata: Metadata = {
-  title: "Questions fréquentes",
+export const metadata: Metadata = metadonneesPage({
+  titre: "Questions fréquentes",
   description:
     "Format des jeux, impression, nombre de joueurs, disponibilité : les réponses aux questions les plus courantes sur nos jeux à imprimer.",
-};
+  chemin: "/faq",
+});
 
 // Uniquement des réponses déjà établies par le projet. Les points qui
 // dépendent des CGV (T1.11) ou du parcours d'achat (T1.8) seront ajoutés avec
@@ -65,7 +67,7 @@ const QUESTIONS: { question: string; reponse: ReactNode }[] = [
 export default function Faq() {
   return (
     <>
-      <FilAriane etapes={[{ libelle: "Questions fréquentes" }]} />
+      <FilAriane etapes={[{ libelle: "Questions fréquentes" }]} cheminCourant="/faq" />
       <div className="conteneur-etroit en-tete-page">
         <h1>Questions fréquentes</h1>
         <p>Les réponses aux questions que l&apos;on nous pose le plus souvent.</p>

@@ -165,3 +165,18 @@
 - **Correction en cours de route :** `process.exit` dans `instrumentation.ts` faisait échouer la compilation du bundle Edge de Next.js (avertissement Turbopack, l'API n'existe pas dans ce runtime) même derrière un `if` — déplacé dans `instrumentation-node.ts`, importé dynamiquement uniquement depuis la branche Node.
 - **Vérifié :** 74 tests unitaires (10 nouveaux pour la vérification légale), 21 tests E2E toujours au vert (aucune régression sur T1.6), lint et TypeScript au vert.
 - **T1.7 terminée.** Débloque T1.8 (paiement, bloqué côté équipe sur le compte Stripe test), T1.9 (jeu gratuit/listes d'attente, bloqué côté équipe sur le compte Brevo) et T1.11 (mentions légales/CGV).
+
+### 16/09/2026 — T1.12 (agent, en direct)
+- **`SITE_URL`/`SITE_PUBLIC`** (D20) : indexation pilotée séparément de `SALES_ENABLED`, volontairement plus simple (lue au runtime, pas figée au build) — se corrige sans reconstruire, contrairement à une vente ouverte par erreur.
+- **`app/robots.ts` et `app/sitemap.ts`** remplacent l'ancien `public/robots.txt` statique (Next.js interdit que les deux coexistent) ; `robots.ts` marqué `export const dynamic = "force-dynamic"` après avoir constaté qu'il se prérendait sinon une bonne fois pour toutes au build, rendant `SITE_PUBLIC` inopérant à l'exécution — trouvé en inspectant le tableau des routes après build (`○ Static` au lieu de `ƒ Dynamic`), pas en le devinant.
+- **Sitemap** : pages statiques, pages collections (D17) et jeux **publiés uniquement** (`listerJeuxPublies`, nouvelle fonction dans `lib/games/queries.ts`) — vérifié que le jeu factice (statut `brouillon`) n'y apparaît pas, même avec `AFFICHER_BROUILLONS=true`.
+- **Canonical + Open Graph + Twitter Card** sur toutes les pages (`lib/seo/meta.ts`), avec l'image de couverture sur les fiches jeux (utile pour Pinterest). `metadataBase` posé dans `app/layout.tsx`.
+- **JSON-LD** (`lib/seo/jsonld.ts`, `components/site/JsonLd.tsx`) : `Organization`/`WebSite` sur toutes les pages, `BreadcrumbList` intégré à `FilAriane` (qui exigeait déjà les mêmes données), `Product`/`Offer` sur les fiches jeux — disponibilité alignée sur `ventesActives()` (T1.7) : jamais `InStock` avant l'ouverture réelle des ventes.
+- **Redirections 301/308 automatiques** (`lib/redirects.ts`) : la table `redirects` existait depuis T1.5 (D12) mais rien ne la consultait côté visiteur — un ancien lien indexé menait droit à la 404. Consultée depuis `app/jeux/[slug]/page.tsx` et `app/[collection]/page.tsx` juste avant `notFound()`, avec `permanentRedirect()` de Next.js (répond en 308, équivalent moderne du 301).
+- **Vérifié en conditions réelles, pas seulement en test :**
+  1. build → `/robots.txt` bien listé en `ƒ Dynamic` après le correctif ci-dessus ;
+  2. serveur démarré → `robots.txt` répond `Disallow: /`, `sitemap.xml` liste les bonnes pages ;
+  3. une ligne insérée à la main dans `redirects` (`/jeux/ancien-nom` et `/ancien-hub`) → les deux répondent bien **308** avec le bon en-tête `Location`, testé pour un jeu et pour une collection, puis nettoyé.
+- **Vérifié :** 84 tests unitaires (10 nouveaux, dont l'échappement JSON-LD contre l'injection de script), 27 tests E2E (dont 6 nouveaux : sitemap, canonical, Open Graph, JSON-LD Organization/WebSite/BreadcrumbList/Product), lint et TypeScript au vert.
+- **Hors périmètre, transmis à d'autres tâches :** `BlogPosting` (pas de route `/blog` encore construite, T1.13/phase 2) ; retrait du mot de passe du staging et bascule `SITE_PUBLIC=true` en production (T2.4, mise en ligne publique) ; validation visuelle dans l'outil de test des résultats enrichis de Google (nécessite un accès navigateur, le staging étant protégé).
+- **T1.12 terminée.**

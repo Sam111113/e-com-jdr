@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import { cache } from "react";
 import { BadgesJeu } from "@/components/jeux/BadgesJeu";
 import { BlocPrixAction } from "@/components/jeux/BlocPrixAction";
 import { GrilleJeux } from "@/components/jeux/GrilleJeux";
 import { ImageJeu } from "@/components/jeux/ImageJeu";
+import { JsonLd } from "@/components/site/JsonLd";
 import { FilAriane, type EtapeFilAriane } from "@/components/site/FilAriane";
 import { TexteRiche } from "@/components/site/TexteRiche";
 import { PAGES_COLLECTIONS } from "@/lib/collections";
@@ -16,6 +17,9 @@ import {
 } from "@/lib/games/format";
 import { LARGEURS_APERCU, LARGEURS_COUVERTURE } from "@/lib/games/images";
 import { apercusDuJeu, jeuxSimilaires, trouverJeu } from "@/lib/games/queries";
+import { trouverRedirection } from "@/lib/redirects";
+import { produitJsonLd } from "@/lib/seo/jsonld";
+import { metadonneesPage } from "@/lib/seo/meta";
 
 // Une seule requête par affichage, partagée entre les métadonnées et la page.
 const chargerJeu = cache(trouverJeu);
@@ -23,7 +27,12 @@ const chargerJeu = cache(trouverJeu);
 export async function generateMetadata({ params }: PageProps<"/jeux/[slug]">): Promise<Metadata> {
   const jeu = await chargerJeu((await params).slug);
   if (!jeu) return {};
-  return { title: jeu.title, description: jeu.pitch };
+  return metadonneesPage({
+    titre: jeu.title,
+    description: jeu.pitch,
+    chemin: `/jeux/${jeu.slug}`,
+    image: jeu.coverPath,
+  });
 }
 
 function hubDuJeu(collections: string[]): EtapeFilAriane | undefined {
@@ -37,8 +46,15 @@ function hubDuJeu(collections: string[]): EtapeFilAriane | undefined {
 }
 
 export default async function FicheJeu({ params }: PageProps<"/jeux/[slug]">) {
-  const jeu = await chargerJeu((await params).slug);
-  if (!jeu) notFound();
+  const { slug } = await params;
+  const jeu = await chargerJeu(slug);
+  if (!jeu) {
+    // Un ancien slug renommé (scripts/rename-game.ts, D12) redirige plutôt
+    // que de renvoyer une 404 sur un lien peut-être déjà indexé.
+    const cible = await trouverRedirection(`/jeux/${slug}`);
+    if (cible) permanentRedirect(cible);
+    notFound();
+  }
 
   const apercus = apercusDuJeu(jeu);
   const similaires = await jeuxSimilaires(jeu);
@@ -46,12 +62,14 @@ export default async function FicheJeu({ params }: PageProps<"/jeux/[slug]">) {
 
   return (
     <>
+      <JsonLd data={produitJsonLd(jeu)} />
       <FilAriane
         etapes={[
           { libelle: "Tous les jeux", href: "/jeux" },
           ...(hub ? [hub] : []),
           { libelle: jeu.title },
         ]}
+        cheminCourant={`/jeux/${jeu.slug}`}
       />
 
       <div className="conteneur">
