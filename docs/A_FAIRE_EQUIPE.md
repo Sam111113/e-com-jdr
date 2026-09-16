@@ -23,6 +23,10 @@
 - [x] **Interrupteur de vente en place** (T1.7) : `config/entreprise.ts` centralise désormais toutes les infos légales à compléter (voir ligne juste en dessous). Le bouton « Acheter » ne s'activera qu'une fois ces champs remplis **et** le site reconstruit (`SALES_ENABLED=true`) — un simple `.env` ne suffit pas (D11, D19), volontairement.
 - [x] **SEO technique en place** (T1.12) : sitemap, robots.txt, canonical, Open Graph/Twitter Card, données structurées (JSON-LD), redirections automatiques quand un slug change. Rien à indexer avant `T2.4` (mise en ligne publique) : le staging reste protégé par mot de passe (D13, D20).
 - [x] **Statistiques Umami branchées** (T1.14) : visites et événement de contact remontent déjà. **Reste à faire par vous :** changer le mot de passe administrateur d'Umami, resté aux identifiants par défaut (`admin` / `umami`) — l'agent n'a pas le droit de modifier un mot de passe lui-même. Accessible en SSH sur le VPS via `http://127.0.0.1:3001` (ou en tunnel SSH depuis votre poste).
+- [x] **Sécurité et sauvegardes en place** (T1.15) : en-têtes de sécurité, limiteur de requêtes, sauvegardes quotidiennes avec restauration réellement testée (voir `docs/PROGRESS.md`). **Reste à faire par vous :**
+  - **Créer le compte administrateur d'Uptime Kuma** : `https://srv1214588.taild2e4d0.ts.net:8445` (sur le tailnet), assistant de premier lancement — 30 secondes. L'agent ne peut pas choisir ce mot de passe à votre place.
+  - **Ajouter un moniteur** pour `https://srv1214588.taild2e4d0.ts.net:8444` et **configurer une notification** (email, Discord, Telegram… au choix dans Uptime Kuma) puis **envoyer une alerte de test** — c'est le seul point qui manque encore pour clore T1.15.
+  - **Choisir la destination des sauvegardes hors du VPS** (déjà listé plus bas) : sans elle, les sauvegardes ne survivraient pas à la perte du VPS lui-même.
 
 ## Pour chaque nouveau jeu (créateur des jeux)
 

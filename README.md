@@ -210,6 +210,68 @@ lien avec `SALES_ENABLED` : celui-là peut changer sans reconstruire.
 - **Sécurité :** l'installation par défaut d'Umami utilise `admin` / `umami`
   — à changer dans son interface avant toute exposition, même limitée.
 
+## Sécurité et sauvegardes (T1.15)
+
+**En-têtes de sécurité** (`lib/securite/entetes.ts`) : CSP, HSTS,
+`X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`,
+`Permissions-Policy`, posés sur toutes les routes par `next.config.ts`. La
+CSP autorise `'unsafe-inline'` en script et style (nécessaire aux données
+d'hydratation de l'App Router), mais reste strictement `'self'` pour tout le
+reste : aucune ressource tierce, aucune iframe (D22).
+
+**Limiteur de requêtes** (`lib/securite/limiteur.ts`) : par adresse IP, en
+mémoire. Déjà branché sur le formulaire de contact ; à réutiliser pour
+chaque nouvelle route sensible (téléchargement, renvoi de liens, liste
+d'attente, newsletter) au fur et à mesure qu'elles sont construites.
+
+### Sauvegardes
+
+```bash
+# Sauvegarde manuelle (la tâche cron le fait chaque nuit à 3 h UTC) :
+cd /root/apps/e-com-jdr-staging
+set -a && . ./.env && set +a
+./docker/sauvegarde.sh
+# Écrit postgres-<date>.dump et prive-<date>.tar.gz dans
+# /root/sauvegardes-ecomjdr/, purge tout ce qui a plus de 14 jours.
+```
+
+**Restauration** (testée le 16/09/2026, sans toucher aux données de
+production — voir `docs/PROGRESS.md`) :
+
+```bash
+# 1. Base de données, dans une base séparée pour vérifier sans risque :
+docker exec ecomjdr-postgres-1 psql -U ecomjdr -d postgres \
+  -c "create database ecomjdr_restore_test owner ecomjdr;"
+./docker/restauration.sh /root/sauvegardes-ecomjdr/postgres-<date>.dump ecomjdr_restore_test
+# Vérifier, puis nettoyer :
+docker exec ecomjdr-postgres-1 psql -U ecomjdr -d postgres \
+  -c "drop database ecomjdr_restore_test;"
+
+# En situation réelle (remplace entièrement la base actuelle) :
+./docker/restauration.sh /root/sauvegardes-ecomjdr/postgres-<date>.dump
+
+# 2. Fichiers privés (kits, factures) :
+tar xzf /root/sauvegardes-ecomjdr/prive-<date>.tar.gz \
+  -C /var/lib/docker/volumes/ecomjdr_private_storage/_data
+```
+
+**Copie hors du VPS : pas encore faite**, en attente de la destination
+choisie par l'équipe (`docs/A_FAIRE_EQUIPE.md`). Une fois décidée, l'ajouter
+en fin de `docker/sauvegarde.sh` (exemple avec [rclone](https://rclone.org/) :
+`rclone copy "$DOSSIER_SAUVEGARDES" mon-remote:ecomjdr-sauvegardes`).
+
+### Surveillance
+
+Uptime Kuma auto-hébergé (`/root/apps/uptime-kuma/`), faute de service
+externe choisi par l'équipe — le brief prévoit cette solution de repli.
+Accessible uniquement sur le tailnet : `https://srv1214588.taild2e4d0.ts.net:8445`.
+
+**Reste à faire par l'équipe** (l'agent ne peut pas choisir un mot de passe
+à sa place) : créer le compte administrateur via l'assistant de premier
+lancement, ajouter un moniteur pour `https://srv1214588.taild2e4d0.ts.net:8444`,
+configurer une notification (email, Discord, Telegram…) et envoyer une
+alerte de test.
+
 ## Déploiement du staging (exécuté par l'équipe sur l'hôte du VPS)
 
 L'agent écrit les fichiers et les commandes ; **l'équipe les exécute** (voir

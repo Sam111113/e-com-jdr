@@ -1,6 +1,7 @@
 // Formulaire de contact (T1.6) : validation, anti-spam et envoi. La logique
 // ne dépend ni de Next.js ni de Brevo, pour être testée directement.
 import { z } from "zod";
+import { creerLimiteurParIp } from "@/lib/securite/limiteur";
 
 export interface EtatContact {
   statut: "initial" | "envoye" | "erreur";
@@ -40,25 +41,10 @@ const schema = z.object({
 const LIMITE_ENVOIS = 5;
 const FENETRE_MS = 15 * 60 * 1000;
 
-/** Limite simple par adresse IP, en mémoire (un seul serveur applicatif). */
+/** Limiteur générique (T1.15, lib/securite/limiteur.ts), avec les valeurs
+ * par défaut historiques du formulaire de contact. */
 export function creerLimiteur(limite = LIMITE_ENVOIS, fenetreMs = FENETRE_MS) {
-  const envois = new Map<string, number[]>();
-  return (ip: string, maintenant = Date.now()): boolean => {
-    const recents = (envois.get(ip) ?? []).filter((date) => maintenant - date < fenetreMs);
-    if (recents.length >= limite) {
-      envois.set(ip, recents);
-      return false;
-    }
-    recents.push(maintenant);
-    envois.set(ip, recents);
-    // Nettoyage occasionnel pour que la table ne grossisse pas indéfiniment.
-    if (envois.size > 10_000) {
-      for (const [cle, dates] of envois) {
-        if (dates.every((date) => maintenant - date >= fenetreMs)) envois.delete(cle);
-      }
-    }
-    return true;
-  };
+  return creerLimiteurParIp(limite, fenetreMs);
 }
 
 const texte = (valeur: FormDataEntryValue | null) => (typeof valeur === "string" ? valeur : "");
