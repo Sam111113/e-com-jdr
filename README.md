@@ -112,6 +112,29 @@ mot de passe, affichage de la page une fois authentifié avec l'en-tête
 `X-Robots-Tag: noindex` et la meta `robots` correspondante, et un
 `robots.txt` qui interdit tout.
 
+## Vérifier les pages du site (T1.6)
+
+Pour voir le jeu factice dans le catalogue (statut `brouillon`) : appliquer
+les migrations et lancer l'import (voir « Base de données » ci-dessous),
+puis démarrer le serveur standalone comme ci-dessus en ajoutant
+`AFFICHER_BROUILLONS=true` et une `DATABASE_URL` valide :
+
+```bash
+DATABASE_URL="$DEV_DATABASE_URL" AFFICHER_BROUILLONS=true \
+PORT=3100 HOSTNAME=127.0.0.1 \
+STAGING_BASIC_AUTH_USER=equipe STAGING_BASIC_AUTH_PASSWORD=changez-moi \
+node .next/standalone/server.js
+```
+
+```bash
+PORT=3100 STAGING_BASIC_AUTH_USER=equipe STAGING_BASIC_AUTH_PASSWORD=changez-moi \
+npx playwright test tests/e2e/pages.spec.ts
+```
+
+Ce test (`tests/e2e/pages.spec.ts`) capture chaque page en mobile et
+ordinateur, en thème clair et sombre, dans `test-results/captures/` — utile
+pour une revue visuelle rapide sans rouvrir chaque page à la main.
+
 ## Déploiement du staging (exécuté par l'équipe sur l'hôte du VPS)
 
 L'agent écrit les fichiers et les commandes ; **l'équipe les exécute** (voir

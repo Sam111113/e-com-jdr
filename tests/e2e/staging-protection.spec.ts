@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 
-// Vérifie le critère « Terminé quand » de T1.3 :
-// une page provisoire s'affiche derrière un mot de passe, en noindex.
+// Vérifie le critère « Terminé quand » de T1.3 (page d'accueil depuis T1.6) :
+// le site s'affiche derrière un mot de passe, en noindex.
 //
 // Nécessite un serveur de production démarré (npm run build && npm run
 // start) avec STAGING_BASIC_AUTH_USER / STAGING_BASIC_AUTH_PASSWORD définis
@@ -33,7 +33,7 @@ test.describe("Protection du staging (T1.3)", () => {
     expect(response?.headers()["x-robots-tag"]).toContain("noindex");
 
     await expect(
-      page.getByRole("heading", { name: /en construction/i }),
+      page.getByRole("heading", { level: 1, name: /soirées à énigmes/i }),
     ).toBeVisible();
 
     const metaRobots = await page

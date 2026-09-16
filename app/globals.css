@@ -1,26 +1,1110 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/* ============================================================
+   Direction B (D14) — design/direction-b/ est la référence visuelle.
+   Thème sombre automatique selon le réglage de l'appareil.
+   Contrastes WCAG vérifiés (≥ 4,5:1 pour tout texte), voir D14.
+   ============================================================ */
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+:root {
+  --ecj-font-titre: var(--font-baloo), "Trebuchet MS", sans-serif;
+  --ecj-font-texte: var(--font-nunito), -apple-system, "Segoe UI", sans-serif;
+
+  --ecj-fond: #fffbf5;
+  --ecj-fond-alt: #f1ecff;
+  --ecj-surface: #ffffff;
+  --ecj-texte: #241645;
+  --ecj-texte-doux: #4a3e73;
+  --ecj-accent: #6b3fe0;
+  --ecj-accent-texte: #ffffff;
+  --ecj-bordure: rgba(36, 22, 69, 0.12);
+  --ecj-ombre: rgba(36, 22, 69, 0.12);
+  /* 0,62 et non 0,55 comme la maquette : à 0,55 le texte doux tombe à 4,25:1
+     sur le rouge de Noël. */
+  --ecj-voile-hero: rgba(255, 255, 255, 0.62);
+  --ecj-alerte: #c21f3a;
+  --ecj-alerte-texte: #ffffff;
+
+  --ecj-rayon-sm: 10px;
+  --ecj-rayon-md: 18px;
+  --ecj-rayon-lg: 28px;
+
+  /* Couleur de saison par défaut (aucune saison active) : l'accent. */
+  --ecj-saison: #6b3fe0;
+  --ecj-saison-texte: #ffffff;
+
+  color-scheme: light dark;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --ecj-fond: #14102a;
+    --ecj-fond-alt: #1f1840;
+    --ecj-surface: #271f4d;
+    --ecj-texte: #f3efff;
+    --ecj-texte-doux: #c9c0ea;
+    --ecj-accent: #b49cff;
+    --ecj-accent-texte: #170f33;
+    --ecj-bordure: rgba(243, 239, 255, 0.14);
+    --ecj-ombre: rgba(0, 0, 0, 0.45);
+    --ecj-voile-hero: rgba(20, 16, 42, 0.72);
+    --ecj-saison: #b49cff;
+    --ecj-saison-texte: #170f33;
   }
 }
 
+/* Couleurs de saison : identiques dans les deux thèmes (contrastes vérifiés
+   entre la couleur et son texte, indépendamment du fond). */
+[data-saison="halloween"] {
+  --ecj-saison: #ff7a29;
+  --ecj-saison-texte: #1f1200;
+}
+[data-saison="noel"] {
+  --ecj-saison: #c21f3a;
+  --ecj-saison-texte: #ffffff;
+}
+[data-saison="saint-valentin"] {
+  --ecj-saison: #e85d75;
+  --ecj-saison-texte: #241645;
+}
+[data-saison="paques"] {
+  --ecj-saison: #7fbf7f;
+  --ecj-saison-texte: #241645;
+}
+
+@theme inline {
+  --font-titre: var(--ecj-font-titre);
+  --font-texte: var(--ecj-font-texte);
+  --color-fond: var(--ecj-fond);
+  --color-fond-alt: var(--ecj-fond-alt);
+  --color-surface: var(--ecj-surface);
+  --color-texte: var(--ecj-texte);
+  --color-texte-doux: var(--ecj-texte-doux);
+  --color-accent: var(--ecj-accent);
+}
+
+/* ----- Base ----- */
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--ecj-font-texte);
+  font-size: 1rem;
+  line-height: 1.65;
+  color: var(--ecj-texte);
+  background-color: var(--ecj-fond);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+main {
+  flex: 1;
+}
+
+a {
+  color: var(--ecj-accent);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+a:hover {
+  text-decoration-thickness: 2px;
+}
+:focus-visible {
+  outline: 3px solid var(--ecj-accent);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--ecj-font-titre);
+  line-height: 1.2;
+  color: var(--ecj-texte);
+}
+
+.lien-evitement {
+  position: absolute;
+  left: 1rem;
+  top: -100px;
+  background: var(--ecj-surface);
+  padding: 0.5rem 1rem;
+  border-radius: var(--ecj-rayon-sm);
+  z-index: 200;
+}
+.lien-evitement:focus {
+  top: 0.5rem;
+}
+
+.conteneur {
+  max-width: 1200px;
+  margin-inline: auto;
+  padding-inline: 1rem;
+}
+.conteneur-etroit {
+  max-width: 760px;
+  margin-inline: auto;
+  padding-inline: 1rem;
+}
+
+/* ============================================================
+   EN-TÊTE — logo et navigation sur la même ligne (corrige la
+   maquette, où la navigation passait sous le logo sur ordinateur)
+   ============================================================ */
+.site-header {
+  background: var(--ecj-surface);
+  border-bottom: 2px solid var(--ecj-bordure);
+  position: relative;
+  z-index: 50;
+}
+
+.header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: 4rem;
+}
+
+.logo {
+  font-family: var(--ecj-font-titre);
+  font-weight: 800;
+  font-size: 1.3rem;
+  line-height: 1.2;
+  color: var(--ecj-accent);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.badge-provisoire {
+  font-family: var(--ecj-font-texte);
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--ecj-texte-doux);
+  background: var(--ecj-fond-alt);
+  border-radius: var(--ecj-rayon-sm);
+  padding: 0.1rem 0.45rem;
+}
+
+.nav-principale {
+  display: none;
+}
+.nav-principale ul,
+.menu-mobile ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.nav-lien {
+  display: block;
+  padding: 0.55rem 0.8rem;
+  font-weight: 700;
+  color: var(--ecj-texte);
+  text-decoration: none;
+  border-radius: var(--ecj-rayon-md);
+}
+.nav-lien:hover,
+.nav-lien[aria-current="page"] {
+  background: var(--ecj-fond-alt);
+  color: var(--ecj-accent);
+}
+.nav-lien-saison {
+  background: var(--ecj-saison);
+  color: var(--ecj-saison-texte);
+}
+.nav-lien-saison:hover,
+.nav-lien-saison[aria-current="page"] {
+  background: var(--ecj-saison);
+  color: var(--ecj-saison-texte);
+  text-decoration: underline;
+}
+
+.menu-mobile > summary {
+  list-style: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--ecj-rayon-md);
+  font-weight: 700;
+  color: var(--ecj-accent);
+}
+.menu-mobile > summary::-webkit-details-marker {
+  display: none;
+}
+.menu-mobile > summary:hover {
+  background: var(--ecj-fond-alt);
+}
+.menu-mobile[open] > summary {
+  background: var(--ecj-fond-alt);
+}
+.menu-mobile-panneau {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: var(--ecj-surface);
+  border-bottom: 2px solid var(--ecj-bordure);
+  padding: 0.5rem 1rem 1rem;
+}
+.menu-mobile-panneau .nav-lien {
+  padding: 0.75rem;
+}
+
+@media (min-width: 900px) {
+  .nav-principale {
+    display: block;
+  }
+  .nav-principale ul {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+  .menu-mobile {
+    display: none;
+  }
+}
+
+/* ============================================================
+   BOUTONS
+   ============================================================ */
+.btn {
+  display: inline-block;
+  font-family: var(--ecj-font-texte);
+  font-weight: 700;
+  font-size: 1rem;
+  line-height: 1.2;
+  padding: 0.8rem 1.75rem;
+  border-radius: var(--ecj-rayon-md);
+  text-decoration: none;
+  text-align: center;
+  cursor: pointer;
+  border: 2.5px solid transparent;
+  transition:
+    box-shadow 0.2s,
+    transform 0.2s;
+}
+.btn:hover {
+  box-shadow: 0 4px 14px var(--ecj-ombre);
+  transform: translateY(-2px);
+  text-decoration: none;
+}
+.btn:disabled,
+.btn[aria-disabled="true"] {
+  opacity: 0.6;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+.btn-primaire {
+  background: var(--ecj-accent);
+  color: var(--ecj-accent-texte);
+}
+.btn-secondaire {
+  background: transparent;
+  color: var(--ecj-accent);
+  border-color: var(--ecj-accent);
+}
+.btn-saison {
+  background: var(--ecj-saison);
+  color: var(--ecj-saison-texte);
+  border-radius: 999px;
+}
+.btn-bloc {
+  display: block;
+  width: 100%;
+}
+
+/* ============================================================
+   HERO
+   ============================================================ */
+.hero {
+  /* Voile clair (ou sombre) au-dessus du dégradé de saison : garde un
+     contraste ≥ 4,5:1 même sur la partie la plus saturée. */
+  background:
+    linear-gradient(var(--ecj-voile-hero), var(--ecj-voile-hero)),
+    linear-gradient(160deg, var(--ecj-saison) 0%, var(--ecj-fond-alt) 60%);
+  padding: 3rem 1rem;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.hero-badge {
+  display: inline-block;
+  background: var(--ecj-surface);
+  color: var(--ecj-texte);
+  border: 2px solid var(--ecj-saison);
+  font-family: var(--ecj-font-titre);
+  font-weight: 700;
+  font-size: 0.85rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 0.35rem 1.2rem;
+  border-radius: 999px;
+  margin-bottom: 1rem;
+  text-decoration: none;
+}
+a.hero-badge:hover {
+  text-decoration: underline;
+}
+.hero h1 {
+  font-weight: 800;
+  max-width: 22ch;
+  margin-inline: auto;
+  font-size: 1.85rem;
+  margin-bottom: 0.75rem;
+}
+.hero-sous-titre {
+  color: var(--ecj-texte-doux);
+  max-width: 560px;
+  margin: 0 auto 1.75rem;
+}
+.hero-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+/* ============================================================
+   SECTIONS
+   ============================================================ */
+.section {
+  padding-block: 2.5rem;
+}
+.section-alt {
+  background: var(--ecj-fond-alt);
+}
+.section-titre {
+  font-weight: 800;
+  font-size: 1.6rem;
+  margin-bottom: 1.25rem;
+}
+.section-intro {
+  color: var(--ecj-texte-doux);
+  margin-bottom: 1.5rem;
+  max-width: 720px;
+}
+
+.en-tete-page {
+  padding-block: 2rem 1rem;
+}
+.en-tete-page h1 {
+  font-weight: 800;
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+.en-tete-page p {
+  color: var(--ecj-texte-doux);
+  max-width: 720px;
+}
+
+/* ============================================================
+   CARTES DE JEU
+   ============================================================ */
+.grille-jeux {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.carte-jeu {
+  background: var(--ecj-surface);
+  border: 2px solid var(--ecj-bordure);
+  border-radius: var(--ecj-rayon-lg);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  position: relative;
+  transition:
+    box-shadow 0.2s,
+    transform 0.2s;
+}
+.carte-jeu:hover {
+  box-shadow: 0 6px 24px var(--ecj-ombre);
+  transform: translateY(-3px);
+}
+.carte-jeu-image {
+  aspect-ratio: 4 / 3;
+  background: var(--ecj-fond-alt);
+}
+.carte-jeu-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.carte-jeu-corps {
+  padding: 1.15rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.carte-jeu :is(h2, h3) {
+  font-weight: 700;
+  font-size: 1.2rem;
+}
+.carte-jeu :is(h2, h3) a {
+  color: var(--ecj-texte);
+  text-decoration: none;
+}
+/* Toute la carte est cliquable, avec un seul lien accessible. */
+.carte-jeu :is(h2, h3) a::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+.carte-jeu :is(h2, h3) a:focus-visible {
+  outline: none;
+}
+.carte-jeu:has(a:focus-visible) {
+  outline: 3px solid var(--ecj-accent);
+  outline-offset: 3px;
+}
+.carte-jeu-pitch {
+  font-size: 0.9rem;
+  color: var(--ecj-texte-doux);
+  flex: 1;
+}
+.carte-jeu-infos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 0.9rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--ecj-texte-doux);
+}
+.carte-jeu-prix {
+  font-family: var(--ecj-font-titre);
+  font-weight: 800;
+  font-size: 1.15rem;
+  color: var(--ecj-accent);
+}
+
+.badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+.badge {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 0.25rem 0.7rem;
+  border-radius: 999px;
+  width: fit-content;
+  background: var(--ecj-fond-alt);
+  color: var(--ecj-texte);
+}
+.badge-brouillon {
+  background: var(--ecj-alerte);
+  color: var(--ecj-alerte-texte);
+}
+.badge-halloween {
+  background: #ff7a29;
+  color: #1f1200;
+}
+.badge-noel {
+  background: #c21f3a;
+  color: #ffffff;
+}
+.badge-saint-valentin {
+  background: #e85d75;
+  color: #241645;
+}
+.badge-paques {
+  background: #7fbf7f;
+  color: #241645;
+}
+
+.etat-vide {
+  background: var(--ecj-surface);
+  border: 2px dashed var(--ecj-bordure);
+  border-radius: var(--ecj-rayon-lg);
+  padding: 2rem 1.5rem;
+  text-align: center;
+  color: var(--ecj-texte-doux);
+}
+.etat-vide p + p {
+  margin-top: 0.75rem;
+}
+
+/* ============================================================
+   CATALOGUE : FILTRES
+   ============================================================ */
+.filtres {
+  background: var(--ecj-surface);
+  border: 2px solid var(--ecj-bordure);
+  border-radius: var(--ecj-rayon-lg);
+  padding: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+.filtres-titre {
+  cursor: pointer;
+  font-weight: 800;
+  color: var(--ecj-accent);
+}
+.filtres-formulaire {
+  margin-top: 1rem;
+}
+.filtres-grille {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.9rem;
+}
+.champ {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+.champ label,
+.champ-libelle {
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+.champ-aide {
+  font-size: 0.8rem;
+  color: var(--ecj-texte-doux);
+}
+.champ input,
+.champ select,
+.champ textarea {
+  font: inherit;
+  color: var(--ecj-texte);
+  background: var(--ecj-fond);
+  border: 2px solid var(--ecj-bordure);
+  border-radius: var(--ecj-rayon-sm);
+  padding: 0.6rem 0.8rem;
+  width: 100%;
+}
+.champ input:focus-visible,
+.champ select:focus-visible,
+.champ textarea:focus-visible {
+  border-color: var(--ecj-accent);
+}
+.filtres-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+.resultats-compte {
+  font-weight: 700;
+  color: var(--ecj-texte-doux);
+  margin-bottom: 1rem;
+}
+
+/* ============================================================
+   COMMENT ÇA MARCHE
+   ============================================================ */
+.etapes {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+  list-style: none;
+  padding: 0;
+  counter-reset: etape;
+}
+.etape {
+  background: var(--ecj-fond-alt);
+  border-radius: var(--ecj-rayon-lg);
+  padding: 1.5rem;
+  text-align: center;
+}
+.section-alt .etape {
+  background: var(--ecj-surface);
+}
+.etape-numero {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: var(--ecj-accent);
+  color: var(--ecj-accent-texte);
+  font-family: var(--ecj-font-titre);
+  font-weight: 800;
+  font-size: 1.4rem;
+  margin-bottom: 0.75rem;
+}
+.etape h3 {
+  font-weight: 700;
+  font-size: 1.15rem;
+  margin-bottom: 0.4rem;
+}
+.etape p {
+  font-size: 0.95rem;
+  color: var(--ecj-texte-doux);
+}
+
+/* ============================================================
+   ENCART EMAIL
+   ============================================================ */
+.encart {
+  background: var(--ecj-surface);
+  border: 2px solid var(--ecj-bordure);
+  border-radius: var(--ecj-rayon-lg);
+  padding: 2rem 1.5rem;
+  max-width: 640px;
+  margin-inline: auto;
+  text-align: center;
+}
+.encart p {
+  color: var(--ecj-texte-doux);
+}
+.formulaire-ligne {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+}
+.formulaire-ligne input {
+  font: inherit;
+  padding: 0.8rem 1.1rem;
+  border-radius: var(--ecj-rayon-md);
+  border: 2px solid var(--ecj-bordure);
+  background: var(--ecj-fond);
+  color: var(--ecj-texte);
+}
+.formulaire-ligne input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.note {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--ecj-texte-doux);
+  margin-top: 0.75rem;
+}
+
+/* ============================================================
+   FIL D'ARIANE
+   ============================================================ */
+.fil-ariane {
+  font-size: 0.9rem;
+  color: var(--ecj-texte-doux);
+  padding-top: 1rem;
+}
+.fil-ariane ol {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+.fil-ariane li + li::before {
+  content: "›";
+  margin-right: 0.35rem;
+  color: var(--ecj-texte-doux);
+}
+.fil-ariane a {
+  font-weight: 700;
+  text-decoration: none;
+}
+.fil-ariane a:hover {
+  text-decoration: underline;
+}
+
+/* ============================================================
+   FICHE JEU
+   ============================================================ */
+.fiche-entete {
+  text-align: center;
+  padding-block: 1.5rem 1rem;
+}
+.fiche-entete .badges {
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+.fiche-entete h1 {
+  font-weight: 800;
+  font-size: 2rem;
+  margin-bottom: 0.75rem;
+}
+.fiche-pitch {
+  color: var(--ecj-texte-doux);
+  font-size: 1.05rem;
+  max-width: 700px;
+  margin-inline: auto;
+}
+
+.fiche-couverture {
+  max-width: 760px;
+  margin: 1.5rem auto 0;
+  border-radius: var(--ecj-rayon-lg);
+  overflow: hidden;
+  aspect-ratio: 16 / 9;
+  background: var(--ecj-fond-alt);
+}
+.fiche-couverture img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.fiche-grille {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+  padding-block: 2rem;
+}
+
+.caracteristiques {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+  margin: 0;
+}
+.caracteristique {
+  background: var(--ecj-fond-alt);
+  border-radius: var(--ecj-rayon-md);
+  padding: 1rem;
+  text-align: center;
+}
+.caracteristique dt {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ecj-texte-doux);
+  font-weight: 800;
+  margin-bottom: 0.3rem;
+}
+.caracteristique dd {
+  font-family: var(--ecj-font-titre);
+  font-weight: 700;
+  font-size: 1.05rem;
+  margin: 0;
+}
+
+.galerie {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.galerie-item {
+  position: relative;
+  border-radius: var(--ecj-rayon-md);
+  overflow: hidden;
+  background: var(--ecj-fond-alt);
+  border: 2px solid var(--ecj-bordure);
+  aspect-ratio: 3 / 4;
+}
+.galerie-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.galerie-item figcaption {
+  position: absolute;
+  left: 0.6rem;
+  bottom: 0.6rem;
+  background: var(--ecj-surface);
+  color: var(--ecj-texte);
+  font-size: 0.75rem;
+  font-weight: 800;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+}
+
+.bloc-prix {
+  background: var(--ecj-surface);
+  border: 2px solid var(--ecj-bordure);
+  border-radius: var(--ecj-rayon-lg);
+  padding: 1.5rem;
+  text-align: center;
+}
+.prix {
+  font-family: var(--ecj-font-titre);
+  font-weight: 800;
+  font-size: 2.25rem;
+  line-height: 1.1;
+  color: var(--ecj-accent);
+}
+.prix-note {
+  font-size: 0.85rem;
+  color: var(--ecj-texte-doux);
+  margin-bottom: 1.1rem;
+}
+
+.fiche-section {
+  margin-top: 2rem;
+}
+.fiche-section h2 {
+  font-weight: 700;
+  font-size: 1.4rem;
+  margin-bottom: 0.75rem;
+}
+
+/* ============================================================
+   TEXTE RICHE (Markdown des fiches et pages de contenu)
+   ============================================================ */
+.texte-riche {
+  color: var(--ecj-texte);
+}
+.texte-riche > * + * {
+  margin-top: 0.9rem;
+}
+.texte-riche h2 {
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin-top: 1.75rem;
+}
+.texte-riche h3 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin-top: 1.4rem;
+}
+.texte-riche ul,
+.texte-riche ol {
+  padding-left: 1.4rem;
+}
+.texte-riche ul {
+  list-style: disc;
+}
+.texte-riche ol {
+  list-style: decimal;
+}
+.texte-riche li + li {
+  margin-top: 0.35rem;
+}
+.texte-riche strong {
+  font-weight: 800;
+}
+.texte-riche blockquote {
+  border-left: 4px solid var(--ecj-accent);
+  padding-left: 1rem;
+  color: var(--ecj-texte-doux);
+}
+
+.faq details {
+  background: var(--ecj-fond-alt);
+  border: 1.5px solid var(--ecj-bordure);
+  border-radius: var(--ecj-rayon-md);
+  padding: 0.9rem 1rem;
+}
+.faq details + details {
+  margin-top: 0.75rem;
+}
+.faq summary {
+  cursor: pointer;
+  font-weight: 800;
+}
+.faq details > div {
+  margin-top: 0.6rem;
+  color: var(--ecj-texte-doux);
+}
+
+.liens-collections {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1.5rem;
+}
+.lien-pastille {
+  display: inline-block;
+  padding: 0.45rem 1rem;
+  border-radius: 999px;
+  border: 2px solid var(--ecj-accent);
+  font-weight: 700;
+  text-decoration: none;
+}
+.lien-pastille:hover {
+  background: var(--ecj-accent);
+  color: var(--ecj-accent-texte);
+}
+
+.message-formulaire {
+  border-radius: var(--ecj-rayon-md);
+  padding: 0.8rem 1rem;
+  font-weight: 700;
+  margin-top: 1rem;
+  background: var(--ecj-fond-alt);
+  border: 2px solid var(--ecj-bordure);
+}
+.message-erreur {
+  border-color: var(--ecj-alerte);
+}
+.champ-erreur {
+  color: var(--ecj-texte);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+.champ-erreur::before {
+  content: "⚠ ";
+}
+.piege {
+  position: absolute;
+  left: -10000px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+.provisoire {
+  border: 2px dashed var(--ecj-alerte);
+  border-radius: var(--ecj-rayon-md);
+  padding: 0.8rem 1rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+}
+
+/* ============================================================
+   PIED DE PAGE
+   ============================================================ */
+.site-footer {
+  background: var(--ecj-surface);
+  border-top: 2px solid var(--ecj-bordure);
+  padding-block: 2rem;
+  margin-top: 2rem;
+}
+.footer-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  text-align: center;
+}
+.footer-liens {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.25rem 1.25rem;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.footer-liens a {
+  display: inline-block;
+  padding-block: 0.4rem;
+  color: var(--ecj-texte-doux);
+  font-weight: 700;
+  text-decoration: none;
+}
+.footer-liens a:hover {
+  color: var(--ecj-accent);
+  text-decoration: underline;
+}
+.footer-note {
+  font-size: 0.85rem;
+  color: var(--ecj-texte-doux);
+}
+
+/* ============================================================
+   TABLETTE ET ORDINATEUR
+   ============================================================ */
+@media (min-width: 640px) {
+  .grille-jeux {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .filtres-grille {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .galerie {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .formulaire-ligne {
+    flex-direction: row;
+  }
+  .formulaire-ligne input {
+    flex: 1;
+  }
+}
+
+@media (min-width: 768px) {
+  .hero {
+    padding: 4.5rem 2rem;
+  }
+  .hero h1 {
+    font-size: 2.6rem;
+  }
+  .hero-actions {
+    flex-direction: row;
+    justify-content: center;
+  }
+  .section {
+    padding-block: 3.5rem;
+  }
+  .section-titre {
+    font-size: 1.9rem;
+  }
+  .etapes {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .caracteristiques {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  .fiche-entete h1,
+  .en-tete-page h1 {
+    font-size: 2.5rem;
+  }
+  .footer-inner {
+    flex-direction: row;
+    justify-content: space-between;
+    text-align: left;
+  }
+  .conteneur,
+  .conteneur-etroit {
+    padding-inline: 2rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .grille-jeux {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .filtres-grille {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .galerie {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .fiche-grille {
+    grid-template-columns: minmax(0, 1fr) 320px;
+    align-items: start;
+  }
+  .bloc-prix {
+    position: sticky;
+    top: 1.5rem;
+  }
+  .hero h1 {
+    font-size: 3.2rem;
+  }
+  .section-titre {
+    font-size: 2.1rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn,
+  .carte-jeu {
+    transition: none;
+  }
+  .btn:hover,
+  .carte-jeu:hover {
+    transform: none;
+  }
 }

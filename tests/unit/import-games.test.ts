@@ -79,6 +79,21 @@ async function generateTestJpeg(filePath: string): Promise<void> {
     .toFile(filePath);
 }
 
+/** Génère un damier noir et blanc 1200×1200 (cases de 8 px), très contrasté. */
+async function generateCheckerboardJpeg(filePath: string): Promise<void> {
+  const size = 1200;
+  const pixels = Buffer.alloc(size * size * 3);
+  for (let y = 0; y < size; y++) {
+    for (let x = 0; x < size; x++) {
+      const value = (Math.floor(x / 8) + Math.floor(y / 8)) % 2 === 0 ? 0 : 255;
+      pixels.fill(value, (y * size + x) * 3, (y * size + x) * 3 + 3);
+    }
+  }
+  await sharp(pixels, { raw: { width: size, height: size, channels: 3 } })
+    .jpeg({ quality: 95 })
+    .toFile(filePath);
+}
+
 /** Construit un jeu fixture complet dans `contentDir`. */
 async function createFixtureGame(
   slug: string,
@@ -346,6 +361,38 @@ describe("importGames — cas supplémentaires", () => {
       path.join(publicDir, slug, "apercu-1.webp"),
     ).metadata();
     expect(apercuMeta.width).toBeLessThanOrEqual(1200);
+  });
+
+  it("floute les aperçus mais pas la couverture, et crée chaque largeur (T1.6)", async () => {
+    const slug = "test-apercus-floutes";
+    const gameDir = await createFixtureGame(slug);
+    // Même damier très contrasté pour la couverture et l'aperçu : seul le
+    // flou peut expliquer une différence de contraste en sortie.
+    await generateCheckerboardJpeg(path.join(gameDir, "cover.jpg"));
+    await generateCheckerboardJpeg(path.join(gameDir, "apercu-1.jpg"));
+
+    const results = await importGames(makeOptions({ only: slug }));
+    expect(results[0].ok).toBe(true);
+
+    const contrast = async (file: string) => {
+      const { channels } = await sharp(path.join(publicDir, slug, file)).stats();
+      return channels[0].stdev;
+    };
+    const coverContrast = await contrast("cover.webp");
+    expect(coverContrast).toBeGreaterThan(80);
+    expect(await contrast("apercu-1.webp")).toBeLessThan(coverContrast * 0.6);
+    expect(await contrast("apercu-1-600.webp")).toBeLessThan(coverContrast * 0.6);
+
+    for (const file of [
+      "cover-480.webp",
+      "cover-480.avif",
+      "cover-960.webp",
+      "cover-960.avif",
+      "apercu-1-600.webp",
+      "apercu-1-600.avif",
+    ]) {
+      expect(fs.existsSync(path.join(publicDir, slug, file)), file).toBe(true);
+    }
   });
 
   it("ne traite pas le dossier _modele", async () => {

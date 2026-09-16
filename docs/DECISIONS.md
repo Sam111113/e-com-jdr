@@ -118,3 +118,13 @@
 - Détail et justification de chaque page : `docs/seo/mots-cles.md`, section 1bis. C'est la structure que T1.6 implémente.
 
 **Raison :** une URL par saison figée sur un seul type (`/escape-game-noel`) ne pouvait pas accueillir les chasses au trésor (D15). Ne créer une page par type que là où la demande est documentée évite les pages sans valeur (AGENTS.md section 6). Aucune page n'étant encore en ligne, le changement ne casse aucune URL. Les kits sont les produits vendus et ne doivent jamais se retrouver sur GitHub. Sans le bon propriétaire de volume, l'app ne pourrait pas écrire les factures (T1.8).
+
+## D18 — Score Lighthouse mobile mesuré sur le VPS de dev : lecture prudente
+*Décidé par l'agent le 16/09/2026 (T1.6).*
+**Constat :** sur les 4 pages testées (accueil, catalogue, fiche jeu, hub Halloween), le score **Performance** mobile de Lighthouse varie de **74 à 94** d'une exécution à l'autre, alors que les 4 pages partagent exactement le même JavaScript (139 Ko, un seul composant client pour la navigation) et un LCP similaire (~2,8 s). Accessibilité et bonnes pratiques sont à **100** de façon stable ; le SEO plafonne à **66** uniquement à cause du `noindex` volontaire du staging (D13), pas d'un problème de contenu.
+**Cause identifiée :** le VPS de dev est partagé (2 vCPU) et sert aussi n8n, OpenCode et Postgres ; Lighthouse mobile applique en plus un ralentissement CPU simulé ×4, qui amplifie fortement toute charge parasite du moment de la mesure (confirmé : la charge système (`uptime`) passait de 0,14 à 1,25 entre deux séries de mesures, avec des écarts de score correspondants).
+**Correctifs appliqués, eux bien réels :**
+- l'image de couverture affichée dans chaque grille (probable élément LCP) passe de `loading="lazy"` à **prioritaire** (`loading="eager"`, `fetchpriority="high"`) pour sa première carte — mesuré : le délai de chargement de cette image passe de ~1,1 s à 0 (`lib/games/queries.ts`/`components/jeux/GrilleJeux.tsx`, prop `premiereSection`).
+- Aucune régression trouvée par ailleurs (JS déjà minimal, pas de police bloquante, images déjà en AVIF/WebP multi-largeurs).
+**Ce que ça veut dire pour la suite :** ne pas interpréter un score ponctuel < 90 sur ce VPS comme un défaut de code sans avoir d'abord vérifié `uptime` avant de mesurer, et sans avoir comparé plusieurs pages entre elles. La mesure de référence à prendre au sérieux sera celle faite sur le VPS de production (D6), non partagé avec d'autres services.
+**Raison :** éviter qu'un agent futur (ou l'équipe) ne modifie du code fonctionnellement correct en réaction à du bruit de mesure, ou au contraire ignore un vrai problème de performance en le mettant systématiquement sur le compte du VPS.

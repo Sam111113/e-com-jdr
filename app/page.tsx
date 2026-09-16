@@ -1,20 +1,80 @@
-export default function Home() {
+import Link from "next/link";
+import { GrilleJeux } from "@/components/jeux/GrilleJeux";
+import { EncartEmail } from "@/components/site/EncartEmail";
+import { EtapesCommentCaMarche } from "@/components/site/EtapesCommentCaMarche";
+import { listerJeux } from "@/lib/games/queries";
+import { SAISONS, saisonActive } from "@/lib/saisons";
+
+export default async function Accueil() {
+  const saison = saisonActive();
+
+  // Jeux phares : ceux de la saison en cours d'abord, sinon les plus récents.
+  let jeux = saison ? await listerJeux({ collections: [saison], limite: 3 }) : [];
+  if (jeux.length === 0) jeux = await listerJeux({ limite: 3 });
+
   return (
-    <div className="flex flex-1 flex-col items-center justify-center bg-zinc-50 px-6 py-24 text-center font-sans dark:bg-black">
-      <main className="flex max-w-xl flex-col items-center gap-4">
-        <p className="text-sm font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
-          Environnement de développement — non public
+    <>
+      <section className="hero" aria-labelledby="titre-accueil">
+        {saison && (
+          <Link href={SAISONS[saison].hub} className="hero-badge">
+            Saison {SAISONS[saison].nom}
+          </Link>
+        )}
+        <h1 id="titre-accueil">Des soirées à énigmes à imprimer, tout simplement</h1>
+        <p className="hero-sous-titre">
+          Escape games, chasses au trésor et murder parties à vivre à la maison, en famille ou
+          entre amis. Imprimez, installez le décor, et que l&apos;aventure commence.
         </p>
-        <h1 className="text-3xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
-          Le site est en construction
-        </h1>
-        <p className="text-base leading-7 text-zinc-600 dark:text-zinc-400">
-          Cette page est un socle technique provisoire (tâche T1.3). Elle
-          n&apos;est accessible qu&apos;à l&apos;équipe, via le réseau privé
-          Tailscale et un mot de passe, et n&apos;est pas indexée par les
-          moteurs de recherche.
-        </p>
-      </main>
-    </div>
+        <div className="hero-actions">
+          <Link href={saison ? SAISONS[saison].hub : "/jeux"} className="btn btn-primaire">
+            {saison ? `Découvrir ${SAISONS[saison].jeux}` : "Découvrir les jeux"}
+          </Link>
+          <Link href="/comment-ca-marche" className="btn btn-secondaire">
+            Comment ça marche ?
+          </Link>
+        </div>
+      </section>
+
+      <section className="section section-alt" aria-labelledby="titre-jeux-phares">
+        <div className="conteneur">
+          <h2 id="titre-jeux-phares" className="section-titre">
+            Jeux phares
+          </h2>
+          <GrilleJeux
+            premiereSection
+            jeux={jeux}
+            vide={
+              <p>
+                Les premiers jeux arrivent très bientôt. Revenez nous voir, ou découvrez en
+                attendant <Link href="/comment-ca-marche">comment se déroule une partie</Link>.
+              </p>
+            }
+          />
+          {jeux.length > 0 && (
+            <p className="note">
+              <Link href="/jeux">Voir tout le catalogue</Link>
+            </p>
+          )}
+        </div>
+      </section>
+
+      <section className="section" aria-labelledby="titre-comment">
+        <div className="conteneur">
+          <h2 id="titre-comment" className="section-titre">
+            Comment ça marche
+          </h2>
+          <EtapesCommentCaMarche />
+        </div>
+      </section>
+
+      <section className="section section-alt">
+        <div className="conteneur">
+          <EncartEmail
+            titre="Soyez prévenu de chaque sortie"
+            texte="Un nouveau jeu, une nouvelle saison : recevez un message dès qu'une aventure est prête à être jouée."
+          />
+        </div>
+      </section>
+    </>
   );
 }

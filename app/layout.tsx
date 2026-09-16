@@ -1,23 +1,34 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import type { Metadata, Viewport } from "next";
+import { Baloo_2, Nunito } from "next/font/google";
+import { connection } from "next/server";
+import { EnTete } from "@/components/site/EnTete";
+import { PiedDePage } from "@/components/site/PiedDePage";
+import { site } from "@/config/site";
+import { saisonActive } from "@/lib/saisons";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const baloo = Baloo_2({
+  variable: "--font-baloo",
   subsets: ["latin"],
+  weight: ["700", "800"],
+  display: "swap",
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const nunito = Nunito({
+  variable: "--font-nunito",
   subsets: ["latin"],
+  display: "swap",
 });
 
-// Staging privé (T1.3, AGENTS.md section 6 et 8) : jamais indexable, en plus
-// du mot de passe posé par le middleware et du header X-Robots-Tag.
+// Staging privé (T1.3, AGENTS.md sections 6 et 8) : jamais indexable, en plus
+// du mot de passe posé par proxy.ts et de l'en-tête X-Robots-Tag. Les réglages
+// d'indexation de la production relèvent de T1.12.
 export const metadata: Metadata = {
-  title: "Site en construction — environnement privé",
-  description:
-    "Environnement de développement interne, non public. Ce contenu n'est pas destiné à être indexé.",
+  title: {
+    default: `${site.nom} : jeux à imprimer`,
+    template: `%s | ${site.nom}`,
+  },
+  description: site.description,
   robots: {
     index: false,
     follow: false,
@@ -29,13 +40,33 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#fffbf5" },
+    { media: "(prefers-color-scheme: dark)", color: "#14102a" },
+  ],
+};
+
+export default async function RootLayout({ children }: LayoutProps<"/">) {
+  // La saison dépend de la date du jour : rendu à chaque requête, jamais figé
+  // au moment du build.
+  await connection();
+  const saison = saisonActive();
+
   return (
     <html
       lang="fr"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      data-saison={saison ?? undefined}
+      className={`${baloo.variable} ${nunito.variable} antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body>
+        <a href="#contenu" className="lien-evitement">
+          Aller au contenu
+        </a>
+        <EnTete saison={saison} />
+        <main id="contenu">{children}</main>
+        <PiedDePage />
+      </body>
     </html>
   );
 }

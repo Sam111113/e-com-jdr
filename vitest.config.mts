@@ -8,6 +8,11 @@ export default defineConfig({
     // les lancer en série évite les interférences entre suites qui
     // réinitialisent le schéma (`resetTestDatabase`).
     fileParallelism: false,
+    // Le défaut (5 s) est trop juste pour les tests d'import qui traitent
+    // plusieurs largeurs d'image avec sharp (T1.6) : sur une machine chargée,
+    // ils dépassent parfois de peu sans qu'il y ait de bug (vu en pratique
+    // sur le VPS de dev, partagé et sans rapport avec le code testé).
+    testTimeout: 15000,
   },
   resolve: {
     alias: {

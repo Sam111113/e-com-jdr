@@ -19,6 +19,12 @@ import type { Storage } from "@/lib/storage/types";
 import { createDefaultStorage } from "@/lib/storage";
 import { type Database } from "@/db/client";
 import { parseFicheFile, FicheValidationError } from "@/lib/games/parse-fiche";
+import {
+  LARGEURS_APERCU,
+  LARGEURS_COUVERTURE,
+  sigmaFlou,
+  suffixeLargeur,
+} from "@/lib/games/images";
 
 // --- Types -----------------------------------------------------------------
 
@@ -210,27 +216,18 @@ async function importOneGame(opts: {
     return { slug, ok: false, errors };
   }
 
-  // (f) Optimiser les images avec sharp.
+  // (f) Optimiser les images avec sharp, en plusieurs largeurs (conventions
+  // de nommage dans lib/games/images.ts, utilisées aussi par les pages).
   const publicGameDir = path.join(publicDir, slug);
   await fsp.mkdir(publicGameDir, { recursive: true });
 
-  // Cover → webp + avif.
-  const coverWebp = path.join(publicGameDir, "cover.webp");
-  const coverAvif = path.join(publicGameDir, "cover.avif");
-  await sharp(coverPath)
-    .resize({ width: 1600, withoutEnlargement: true })
-    .webp({ quality: 80 })
-    .toFile(coverWebp);
-  await sharp(coverPath)
-    .resize({ width: 1600, withoutEnlargement: true })
-    .avif({ quality: 55 })
-    .toFile(coverAvif);
-  // Chemin public de la cover : on stocke toujours le webp. Le composant
-  // Next Image ou une balise `<picture>` pourra reconstruire le `.avif`
-  // en changeant l'extension.
+  // Cover → webp + avif. On stocke le chemin du webp le plus grand ; les
+  // pages en déduisent l'avif et les autres largeurs.
+  await writeImageVariants(coverPath, publicGameDir, "cover", LARGEURS_COUVERTURE);
   const coverPublicPath = `/games/${slug}/cover.webp`;
 
-  // Aperçus → webp + avif, triés par ordre alphabétique des fichiers source.
+  // Aperçus → webp + avif, floutés (les pages du kit ne doivent pas être
+  // lisibles avant l'achat), triés par ordre alphabétique des fichiers source.
   const apercuPaths: { webp: string; avif: string }[] = [];
   for (const apercuFile of apercuFiles) {
     const sourcePath = path.join(gameDir, apercuFile);
@@ -238,14 +235,9 @@ async function importOneGame(opts: {
     const webpName = `${baseName}.webp`;
     const avifName = `${baseName}.avif`;
 
-    await sharp(sourcePath)
-      .resize({ width: 1200, withoutEnlargement: true })
-      .webp({ quality: 80 })
-      .toFile(path.join(publicGameDir, webpName));
-    await sharp(sourcePath)
-      .resize({ width: 1200, withoutEnlargement: true })
-      .avif({ quality: 55 })
-      .toFile(path.join(publicGameDir, avifName));
+    await writeImageVariants(sourcePath, publicGameDir, baseName, LARGEURS_APERCU, {
+      blur: true,
+    });
 
     apercuPaths.push({
       webp: `/games/${slug}/${webpName}`,
@@ -318,6 +310,29 @@ async function importOneGame(opts: {
 
   // (j) Succès.
   return { slug, ok: true, gameId: upserted.id };
+}
+
+// --- Images ----------------------------------------------------------------
+
+async function writeImageVariants(
+  sourcePath: string,
+  targetDir: string,
+  baseName: string,
+  widths: readonly number[],
+  options: { blur?: boolean } = {},
+): Promise<void> {
+  const { width: sourceWidth } = await sharp(sourcePath).metadata();
+  for (const width of widths) {
+    // `withoutEnlargement` : une source plus étroite garde sa largeur.
+    const outputWidth = Math.min(width, sourceWidth ?? width);
+    const pipeline = () => {
+      const image = sharp(sourcePath).resize({ width, withoutEnlargement: true });
+      return options.blur ? image.blur(sigmaFlou(outputWidth)) : image;
+    };
+    const name = `${baseName}${suffixeLargeur(width, widths)}`;
+    await pipeline().webp({ quality: 80 }).toFile(path.join(targetDir, `${name}.webp`));
+    await pipeline().avif({ quality: 55 }).toFile(path.join(targetDir, `${name}.avif`));
+  }
 }
 
 // --- CLI -------------------------------------------------------------------
