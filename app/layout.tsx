@@ -64,6 +64,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
   // au moment du build.
   await connection();
   const saison = saisonActive();
+  const umamiId = process.env.UMAMI_WEBSITE_ID;
 
   return (
     <html
@@ -81,6 +82,12 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
         <EnTete saison={saison} />
         <main id="contenu">{children}</main>
         <PiedDePage />
+        {umamiId && (
+          // Umami : sans cookies, sans donnée personnelle — pas de bannière
+          // de consentement nécessaire (T1.14). Script et endpoint de
+          // collecte sous /stats, même origine que le site (next.config.ts).
+          <script defer src="/stats/script.js" data-website-id={umamiId} data-host-url="/stats" />
+        )}
       </body>
     </html>
   );

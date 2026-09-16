@@ -22,6 +22,7 @@
 - [x] **Pages du site livrées** (T1.6) : accueil, catalogue filtrable, fiche jeu, pages collections (D17), pages annexes. Détail dans `docs/PROGRESS.md`.
 - [x] **Interrupteur de vente en place** (T1.7) : `config/entreprise.ts` centralise désormais toutes les infos légales à compléter (voir ligne juste en dessous). Le bouton « Acheter » ne s'activera qu'une fois ces champs remplis **et** le site reconstruit (`SALES_ENABLED=true`) — un simple `.env` ne suffit pas (D11, D19), volontairement.
 - [x] **SEO technique en place** (T1.12) : sitemap, robots.txt, canonical, Open Graph/Twitter Card, données structurées (JSON-LD), redirections automatiques quand un slug change. Rien à indexer avant `T2.4` (mise en ligne publique) : le staging reste protégé par mot de passe (D13, D20).
+- [x] **Statistiques Umami branchées** (T1.14) : visites et événement de contact remontent déjà. **Reste à faire par vous :** changer le mot de passe administrateur d'Umami, resté aux identifiants par défaut (`admin` / `umami`) — l'agent n'a pas le droit de modifier un mot de passe lui-même. Accessible en SSH sur le VPS via `http://127.0.0.1:3001` (ou en tunnel SSH depuis votre poste).
 
 ## Pour chaque nouveau jeu (créateur des jeux)
 

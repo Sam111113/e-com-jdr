@@ -194,6 +194,22 @@ lien avec `SALES_ENABLED` : celui-là peut changer sans reconstruire.
   données avec l'outil de test des résultats enrichis de Google se fait en
   mode « coller le code source de la page », pas en collant l'URL.
 
+## Statistiques (Umami, T1.14)
+
+- Umami tourne déjà (docker-compose.yml, T1.3), mais sert un site à la fois :
+  après un premier déploiement (ou si le site n'existe plus), en créer un
+  via son interface (`http://127.0.0.1:3001` sur le VPS, ou son API `POST
+  /api/websites`), puis mettre son identifiant dans `UMAMI_WEBSITE_ID`.
+- Le script est servi en même origine que le site (`/stats/script.js`,
+  `next.config.ts`), pas depuis Umami directement : sans cookies, sans
+  bannière RGPD nécessaire, et pas de blocage par les bloqueurs de
+  publicité (D21).
+- Événements suivis : `contact_envoye` (formulaire de contact). Les clics
+  sur « Me prévenir de la sortie » et les inscriptions arriveront avec T1.9,
+  quand ces boutons deviendront réellement cliquables.
+- **Sécurité :** l'installation par défaut d'Umami utilise `admin` / `umami`
+  — à changer dans son interface avant toute exposition, même limitée.
+
 ## Déploiement du staging (exécuté par l'équipe sur l'hôte du VPS)
 
 L'agent écrit les fichiers et les commandes ; **l'équipe les exécute** (voir

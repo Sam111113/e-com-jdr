@@ -29,7 +29,9 @@ export function BlocPrixAction({ prixEur }: { prixEur: number }) {
         </>
       ) : (
         <>
-          {/* Le clic ne fait rien tant que T1.9 n'a pas créé la liste d'attente. */}
+          {/* Le clic ne fait rien tant que T1.9 n'a pas créé la liste d'attente ;
+              ajouter le suivi Umami (T1.14) au même moment, pas avant (un
+              bouton désactivé ne déclenche aucun clic à mesurer). */}
           <button type="button" className="btn btn-saison btn-bloc" disabled>
             Me prévenir de la sortie
           </button>

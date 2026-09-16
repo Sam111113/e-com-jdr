@@ -1,7 +1,8 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect } from "react";
 import type { EtatContact } from "@/lib/contact/formulaire";
+import { suivreEvenement } from "@/lib/analytics/umami";
 import { envoyerContact } from "./actions";
 
 const ETAT_INITIAL: EtatContact = { statut: "initial" };
@@ -17,6 +18,10 @@ function Erreur({ id, texte }: { id: string; texte?: string }) {
 
 export function FormulaireContact() {
   const [etat, action, enCours] = useActionState(envoyerContact, ETAT_INITIAL);
+
+  useEffect(() => {
+    if (etat.statut === "envoye") suivreEvenement("contact_envoye");
+  }, [etat.statut]);
 
   if (etat.statut === "envoye") {
     return (
