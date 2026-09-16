@@ -152,3 +152,16 @@
 - **Performance :** voir D18. Score Lighthouse mobile mesuré entre 74 et 94 selon la charge du VPS de dev (partagé), toutes les pages ayant un JavaScript identique et minimal. Un vrai correctif appliqué (image de couverture prioritaire au lieu de différée) a mesurablement supprimé son délai de chargement. Accessibilité et bonnes pratiques à 100 de façon stable.
 - **Vérifié :** 64 tests unitaires (dont les nouveaux tests saisons/filtres/collections/contact/flou), 21 tests E2E (build de production, mobile et ordinateur, clair et sombre, 404, filtres, fiche jeu, menu mobile, en-tête, formulaire de contact), lint et TypeScript au vert, aucun défilement horizontal sur aucune page testée.
 - **T1.6 terminée.** Débloque T1.7 (interrupteur de vente) et T1.12 (SEO technique).
+
+### 16/09/2026 — T1.7 (agent, en direct)
+- **`config/entreprise.ts`** : toutes les infos légales (raison sociale, forme juridique, SIRET, adresse, email de contact, régime de TVA, médiateur de la consommation, hébergeur, directeur de publication), valeurs provisoires marquées `"À COMPLÉTER"`.
+- **`SALES_ENABLED` réellement figée au build** (D19, application stricte de D11), pas simplement lue au runtime : `scripts/check-legal-config.ts` (hook `prebuild`/`predev`) vérifie `config/entreprise.ts` puis génère `config/sales-enabled.generated.ts`, seul import autorisé pour piloter le bouton (`lib/ventes/sales-enabled.ts`) ; `docker-compose.yml` passe `SALES_ENABLED` en argument de build Docker ; `instrumentation.ts` refuse de démarrer le serveur si l'environnement diffère de la valeur du build.
+- **Bouton d'action de la fiche jeu** (`components/jeux/BlocPrixAction.tsx`) : « Me prévenir de la sortie » (ventes fermées) ou « Acheter » (ventes ouvertes) — les deux restent désactivés pour l'instant, la liste d'attente (T1.9) et le paiement (T1.8) n'existant pas encore ; aucune formulation ne laisse croire qu'on peut déjà commander.
+- **`AFFICHER_PRIX`** : réglage cosmétique séparé pour masquer les prix, sans lien avec `SALES_ENABLED`, changeable sans reconstruire.
+- **Garde-fou vérifié en conditions réelles**, pas seulement en test unitaire :
+  1. `SALES_ENABLED=true npm run prebuild` sur la configuration actuelle (incomplète) → échec, liste les 10 champs manquants ;
+  2. build normal → réussit, `config/sales-enabled.generated.ts` généré avec `false` ;
+  3. serveur démarré avec `SALES_ENABLED=true` dans l'environnement alors que le build a été fait avec `false` → refuse de démarrer, message explicite, sort en erreur.
+- **Correction en cours de route :** `process.exit` dans `instrumentation.ts` faisait échouer la compilation du bundle Edge de Next.js (avertissement Turbopack, l'API n'existe pas dans ce runtime) même derrière un `if` — déplacé dans `instrumentation-node.ts`, importé dynamiquement uniquement depuis la branche Node.
+- **Vérifié :** 74 tests unitaires (10 nouveaux pour la vérification légale), 21 tests E2E toujours au vert (aucune régression sur T1.6), lint et TypeScript au vert.
+- **T1.7 terminée.** Débloque T1.8 (paiement, bloqué côté équipe sur le compte Stripe test), T1.9 (jeu gratuit/listes d'attente, bloqué côté équipe sur le compte Brevo) et T1.11 (mentions légales/CGV).

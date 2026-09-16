@@ -22,6 +22,11 @@ services:
     build:
       context: ..
       dockerfile: docker/Dockerfile
+      # SALES_ENABLED est figé au build (T1.7, D11) : reconstruire l'image
+      # est le SEUL moyen de changer ce réglage, jamais un `.env` + restart.
+      # Nécessite `--env-file .env` (voir l'avertissement en tête de fichier).
+      args:
+        SALES_ENABLED: ${SALES_ENABLED:-false}
     image: ecomjdr-app:latest
     restart: unless-stopped
     env_file:

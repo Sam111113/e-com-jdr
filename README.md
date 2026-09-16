@@ -135,6 +135,38 @@ Ce test (`tests/e2e/pages.spec.ts`) capture chaque page en mobile et
 ordinateur, en thème clair et sombre, dans `test-results/captures/` — utile
 pour une revue visuelle rapide sans rouvrir chaque page à la main.
 
+## Interrupteur de vente et ouverture des ventes (T1.7)
+
+`SALES_ENABLED` pilote le bouton (« Me prévenir de la sortie » ou
+« Acheter »), et sera étendu par T1.8/T1.9 aux routes de paiement et de
+téléchargement. **Sa valeur est figée au build**, pas seulement lue au
+runtime (décision D11) : changer `.env` et redémarrer le conteneur SANS
+reconstruire l'image ne rouvre jamais les ventes, ça ne fait que bloquer le
+démarrage du serveur (garde-fou volontaire). Ouvrir les ventes demande donc,
+une fois `config/entreprise.ts` complété (plus aucune valeur
+`"À COMPLÉTER"`) :
+
+```bash
+docker compose -f docker/docker-compose.yml --env-file .env build app
+docker compose -f docker/docker-compose.yml --env-file .env up -d app
+```
+
+Si `config/entreprise.ts` contient encore une valeur provisoire, l'étape
+`build` échoue avant même de lancer `next build`, en listant chaque champ
+fautif (`scripts/check-legal-config.ts`, exécuté automatiquement en
+`prebuild`).
+
+Pour vérifier le garde-fou sans rien casser (safe, ne modifie aucun
+déploiement) :
+
+```bash
+# Doit échouer et lister les champs de config/entreprise.ts encore à compléter :
+SALES_ENABLED=true npm run prebuild
+```
+
+`AFFICHER_PRIX` (affichage des prix) est un réglage cosmétique séparé, sans
+lien avec `SALES_ENABLED` : celui-là peut changer sans reconstruire.
+
 ## Déploiement du staging (exécuté par l'équipe sur l'hôte du VPS)
 
 L'agent écrit les fichiers et les commandes ; **l'équipe les exécute** (voir

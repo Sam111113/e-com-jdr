@@ -24,6 +24,12 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
+# SALES_ENABLED est figé DANS LE BUNDLE au build (T1.7, décision D11) : passé
+# ici en argument de build (voir docker-compose.yml, build.args), jamais lu
+# depuis .env à cette étape. Défaut à false : un build lancé sans préciser
+# l'argument reste dans l'état le plus sûr (ventes fermées).
+ARG SALES_ENABLED=false
+ENV SALES_ENABLED=${SALES_ENABLED}
 RUN npm run build
 
 FROM node:24-alpine AS runner

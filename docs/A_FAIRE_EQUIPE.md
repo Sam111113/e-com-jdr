@@ -20,6 +20,7 @@
 
 - [x] **Feu vert donné aux 3 articles réécrits** (`content/blog/`) : plus rien ne bloque leur publication le moment venu (reste soumise à l'ouverture de la vitrine, phase 2).
 - [x] **Pages du site livrées** (T1.6) : accueil, catalogue filtrable, fiche jeu, pages collections (D17), pages annexes. Détail dans `docs/PROGRESS.md`.
+- [x] **Interrupteur de vente en place** (T1.7) : `config/entreprise.ts` centralise désormais toutes les infos légales à compléter (voir ligne juste en dessous). Le bouton « Acheter » ne s'activera qu'une fois ces champs remplis **et** le site reconstruit (`SALES_ENABLED=true`) — un simple `.env` ne suffit pas (D11, D19), volontairement.
 
 ## Pour chaque nouveau jeu (créateur des jeux)
 
@@ -64,8 +65,7 @@
 
 ## Phase 3 — Ouverture des ventes (ne pas attendre pour avancer, mais à préparer)
 
-- [ ] Infos légales complètes : nom, statut (micro-entreprise / SAS), SIRET, adresse, régime de TVA.
-- [ ] Coordonnées du médiateur de la consommation.
+- [ ] **Compléter `config/entreprise.ts`** (raison sociale, forme juridique, SIRET, adresse, email de contact, médiateur de la consommation, hébergeur, directeur de publication) : chaque champ encore marqué `"À COMPLÉTER"` bloque le build dès que `SALES_ENABLED=true` (T1.7).
 - [ ] Clés Stripe **live**, écrites directement dans le `.env` de production par l'équipe (jamais transmises dans la conversation).
 - [ ] Validation des mentions légales et CGV définitives.
 - [ ] Réaliser un vrai achat de test en production, puis son remboursement (T3.7).

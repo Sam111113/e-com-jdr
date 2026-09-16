@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { LARGEURS_COUVERTURE } from "@/lib/games/images";
 import { formaterDuree, formaterJoueurs, formaterPrix } from "@/lib/games/format";
+import { afficherPrix } from "@/lib/ventes/sales-enabled";
 import type { Jeu } from "@/lib/games/queries";
 import { BadgesJeu } from "./BadgesJeu";
 import { ImageJeu } from "./ImageJeu";
@@ -38,7 +39,7 @@ function CarteJeu({
           <span>{formaterDuree(jeu.dureeMinutes)}</span>
           <span>Dès {jeu.ageMin} ans</span>
         </p>
-        <p className="carte-jeu-prix">{formaterPrix(jeu.prixEur)}</p>
+        {afficherPrix() && <p className="carte-jeu-prix">{formaterPrix(jeu.prixEur)}</p>}
       </div>
     </article>
   );

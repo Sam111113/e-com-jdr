@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { cache } from "react";
 import { BadgesJeu } from "@/components/jeux/BadgesJeu";
+import { BlocPrixAction } from "@/components/jeux/BlocPrixAction";
 import { GrilleJeux } from "@/components/jeux/GrilleJeux";
 import { ImageJeu } from "@/components/jeux/ImageJeu";
 import { FilAriane, type EtapeFilAriane } from "@/components/site/FilAriane";
@@ -10,7 +11,6 @@ import { PAGES_COLLECTIONS } from "@/lib/collections";
 import {
   formaterDuree,
   formaterJoueurs,
-  formaterPrix,
   LIBELLES_DIFFICULTES,
   LIBELLES_PUBLICS,
 } from "@/lib/games/format";
@@ -147,15 +147,7 @@ export default async function FicheJeu({ params }: PageProps<"/jeux/[slug]">) {
             </section>
           </div>
 
-          <aside className="bloc-prix" aria-label="Prix et disponibilité">
-            <p className="prix">{formaterPrix(jeu.prixEur)}</p>
-            <p className="prix-note">Prix TTC, kit PDF à imprimer</p>
-            {/* Bouton réel (liste d'attente ou achat selon SALES_ENABLED) : T1.7. */}
-            <button type="button" className="btn btn-saison btn-bloc" disabled>
-              Me prévenir de la sortie
-            </button>
-            <p className="note">Ce jeu n&apos;est pas encore disponible à la vente.</p>
-          </aside>
+          <BlocPrixAction prixEur={jeu.prixEur} />
         </div>
       </div>
 
