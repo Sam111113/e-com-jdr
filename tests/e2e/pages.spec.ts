@@ -96,7 +96,10 @@ test("la fiche du jeu affiche les informations, les aperçus et aucun achat poss
   for (const section of ["L'histoire", "Aperçu du kit", "Contenu du kit", "Préparation et matériel", "Questions fréquentes"]) {
     await expect(page.getByRole("heading", { level: 2, name: section })).toBeVisible();
   }
-  await expect(page.getByRole("button", { name: "Me prévenir de la sortie" })).toBeDisabled();
+  // Depuis T1.9, le bouton est un vrai formulaire de liste d'attente (email +
+  // soumission), plus le bouton désactivé placeholder de T1.7 : aucun achat
+  // n'est pour autant possible, la validation HTML5 exige l'email.
+  await expect(page.getByRole("button", { name: "Me prévenir de la sortie" })).toBeEnabled();
   await expect(page.getByRole("button", { name: /acheter/i })).toHaveCount(0);
 
   const apercus = page.getByRole("img", { name: /aperçu flouté/i });
