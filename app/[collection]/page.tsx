@@ -5,6 +5,7 @@ import Link from "next/link";
 import { notFound, permanentRedirect } from "next/navigation";
 import { GrilleJeux } from "@/components/jeux/GrilleJeux";
 import { FilAriane } from "@/components/site/FilAriane";
+import { FormulaireEncartEmail } from "@/components/site/FormulaireEncartEmail";
 import { pagesTypeDuHub, trouverPageCollection } from "@/lib/collections";
 import { listerJeux } from "@/lib/games/queries";
 import { trouverRedirection } from "@/lib/redirects";
@@ -85,6 +86,11 @@ export default async function PageCollection({ params }: PageProps<"/[collection
                 )}
                 .
               </p>
+              <div className="encart">
+                <h2 className="section-titre">Soyez prévenu(e) dès la sortie</h2>
+                <p>Laissez votre email pour recevoir un message dès qu&apos;un jeu de cette collection est prêt.</p>
+                <FormulaireEncartEmail />
+              </div>
             </>
           }
         />
