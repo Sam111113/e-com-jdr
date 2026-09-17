@@ -1,15 +1,14 @@
-// Bloc prix + bouton d'action de la fiche jeu (T1.7).
+// Bloc prix + bouton d'action de la fiche jeu (T1.7, achat T1.8).
 //
-// Les deux boutons restent désactivés pour l'instant : la liste d'attente
-// (T1.9) et le paiement Stripe (T1.8) n'existent pas encore. Ce composant ne
-// fait que refléter honnêtement le réglage SALES_ENABLED, figé au build
+// La liste d'attente (T1.9) n'existe pas encore, son bouton reste désactivé.
+// Ce composant reflète honnêtement le réglage SALES_ENABLED, figé au build
 // (voir lib/ventes/sales-enabled.ts) — aucune formulation ne doit laisser
-// croire qu'on peut déjà commander tant que SALES_ENABLED=false (brief,
-// interdits).
+// croire qu'on peut commander tant que SALES_ENABLED=false (brief, interdits).
 import { afficherPrix, ventesActives } from "@/lib/ventes/sales-enabled";
 import { formaterPrix } from "@/lib/games/format";
+import { BoutonAcheter } from "./BoutonAcheter";
 
-export function BlocPrixAction({ prixEur }: { prixEur: number }) {
+export function BlocPrixAction({ prixEur, slug }: { prixEur: number; slug: string }) {
   const actif = ventesActives();
   return (
     <aside className="bloc-prix" aria-label="Prix et disponibilité">
@@ -20,13 +19,7 @@ export function BlocPrixAction({ prixEur }: { prixEur: number }) {
         </>
       )}
       {actif ? (
-        <>
-          {/* Le clic ne fait rien tant que T1.8 n'a pas créé la session Stripe Checkout. */}
-          <button type="button" className="btn btn-primaire btn-bloc" disabled>
-            Acheter
-          </button>
-          <p className="note">Le paiement en ligne est en cours d&apos;intégration.</p>
-        </>
+        <BoutonAcheter slug={slug} />
       ) : (
         <>
           {/* Le clic ne fait rien tant que T1.9 n'a pas créé la liste d'attente ;
