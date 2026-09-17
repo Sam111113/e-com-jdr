@@ -38,20 +38,21 @@
 
 - [x] **Créer un compte Stripe** (même non activé, le mode test suffit) et écrire les clés **test** dans le `.env` du VPS. *Fait — `STRIPE_SECRET_KEY`/`STRIPE_PUBLISHABLE_KEY` présentes et au bon format.*
 - [x] **Installer Stripe CLI** sur le VPS (`stripe` v1.50.11 disponible). ⚠️ **`STRIPE_WEBHOOK_SECRET` dans le `.env` du staging était une valeur invalide** (ne correspondait à aucun format Stripe reconnu, `stripe listen --print-secret` donne une tout autre valeur) — corrigée par l'agent le 17/09/2026 ; à vérifier que c'est bien la bonne avant le premier vrai webhook.
-- [ ] **Créer un compte Brevo** et écrire la clé API dans le `.env` du VPS. *Nécessaire pour T1.9.* (`BREVO_API_KEY`/`EMAIL_EXPEDITEUR`/`CONTACT_EMAIL_DESTINATAIRE` déjà présentes — à confirmer qu'elles sont bien valides, non testé par l'agent.)
+- [ ] **Créer un compte Brevo** et écrire la clé API dans le `.env` du VPS. *Nécessaire pour T1.9, désormais codée et déployée.* (`BREVO_API_KEY`/`EMAIL_EXPEDITEUR`/`CONTACT_EMAIL_DESTINATAIRE` déjà présentes — **toujours pas confirmé par un vrai envoi** : l'agent n'a testé que la logique de double opt-in en base, pas l'appel réel à l'API Brevo, pour ne pas envoyer un email sans autorisation explicite. Un vrai test d'inscription sur `/jeu-gratuit` avec une adresse à vous confirmerait les deux d'un coup.)
 - [ ] **Choisir la destination des sauvegardes hors du VPS** (T1.15) : service externe (ex. Backblaze B2, autre serveur) — création de compte par l'équipe si besoin.
 - [ ] **Nouveau (T1.8) : remplir `config/entreprise.ts`**, même avec des valeurs provisoires mais réelles (pas `"À COMPLÉTER"`), pour pouvoir tester un achat complet sur le staging. Le garde-fou D11 (volontaire, T1.7) refuse de construire l'image avec `SALES_ENABLED=true` tant qu'un champ reste provisoire — **et refuse aussi explicitement que l'agent le contourne avec de fausses valeurs**, y compris pour un test staging. Sans ce champ rempli, T1.8 reste vérifié uniquement par les tests automatisés (112 tests, tous au vert), pas par un achat réel de bout en bout. Cette tâche est la même que celle déjà notée côté "Décisions" pour la société (SIRET, etc.) — la remplir, même provisoirement, débloque aussi T1.11.
 
 ## Phase 1 — Non bloquant
 
-- [ ] **Compléter la section 0 « Tout de suite » d'`AGENTS.md`** : nom de la marque, email de contact public, contact pour les validations. *Laissée vide volontairement pour l'instant ; l'agent utilise des valeurs provisoires clairement marquées.*
+- [x] **Compléter la section 0 « Tout de suite » d'`AGENTS.md`** : fait le 17/09 (marque PartyHunter, domaine, email de contact, Telegram).
 - [ ] **Faire valider le format des numéros de facture** (`F-000001` / `A-000001`, sans remise à zéro annuelle) par l'équipe ou son comptable. Le mécanisme sans rupture est déjà imposé (D8), seul le format est à confirmer.
+- [ ] **Nouveau (T1.9) : une page « bientôt disponible » par jeu précis** (pas seulement par saison) demanderait un nouvel état de catalogue (`games.status` n'a que `brouillon`/`publie`) — pas construit faute d'un jeu à venir réel pour le justifier. À revoir quand un deuxième jeu sera annoncé avant sa sortie.
 
 ## Phase 1 — Important (à fournir avant les jalons correspondants)
 
 - [ ] **Valider la structure des pages collections** que l'agent proposera en révisant T1.13 pour couvrir plusieurs types de jeu (D15). *Nécessaire avant T1.6.*
 - [ ] **Fournir le premier vrai jeu** (fiche + PDF + visuels) vers le 01/10. En attendant, l'agent utilise un jeu factice clairement marqué comme tel.
-- [ ] **Décider du modèle d'authentification admin** (T1.10) : compte partagé simple ou comptes nominatifs dès la phase 1 ?
+- [ ] **Décider du modèle d'authentification admin** (T1.10) : compte partagé simple ou comptes nominatifs ? *T1.8 et T1.9 étant terminées, T1.10 n'attend plus que cette décision.*
 
 ## Phase 1 — Plus tard mais à anticiper
 

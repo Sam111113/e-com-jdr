@@ -12,14 +12,14 @@
 | T1.6 | Pages du site | **Terminée le 16/09** | Agent, en direct |
 | T1.7 | Interrupteur de vente et configuration légale | **Terminée le 16/09** | Agent, en direct |
 | T1.8 | Achat et livraison (Stripe test) | **Code terminé le 17/09, déployé sur le staging (ventes toujours fermées) ; achat réel non vérifié — bloqué sur `config/entreprise.ts` (voir A_FAIRE_EQUIPE.md)** | Agent, en direct |
-| T1.9 | Jeu gratuit, listes d'attente et newsletter | À faire | — |
-| T1.10 | Admin minimale | À faire — dépend de T1.9 | — |
+| T1.9 | Jeu gratuit, listes d'attente et newsletter | **Terminée le 17/09** — déployée et vérifiée sur le staging | Agent, en direct |
+| T1.10 | Admin minimale | À faire — T1.8 et T1.9 terminées, débloquée | — |
 | T1.11 | Brouillons des pages légales | À faire | — |
 | T1.12 | SEO technique | **Terminée le 16/09** | Agent, en direct |
 | T1.13 | Mots-clés et calendrier éditorial | **Structure validée le 15/09 (D17) ; 3 articles réécrits par l'équipe, en attente du feu vert final avant publication** | Agent, articles réécrits par l'équipe |
 | T1.14 | Statistiques de visite | **Terminée le 16/09** | Agent, en direct |
 | T1.15 | Sécurité, sauvegardes, surveillance | **Quasi terminée le 16/09** — reste le compte Uptime Kuma et la destination des sauvegardes (équipe) | Agent, en direct |
-| T1.16 | Tests automatisés | À faire — dépend de T1.8 et T1.9 | — |
+| T1.16 | Tests automatisés | À faire — T1.8 et T1.9 terminées, débloquée (couverture unitaire déjà en place, reste l'E2E d'achat via Stripe CLI) | — |
 
 ---
 
@@ -216,3 +216,21 @@
 - **Vérifié :** 112 tests unitaires (21 nouveaux : webhook/idempotence/remboursement, jetons de téléchargement dont la course concurrente, numérotation et émission des factures/avoirs, filigrane, paramètres de la session Checkout), lint et TypeScript au vert, `next build` réussi en local et dans l'image Docker.
 - **Commité** (`a9d7f20`, `d194d3b`) sur le dépôt local des agents (`/root/workspace/e-com-jdr`), **pas encore poussé sur GitHub** — en attente de confirmation.
 - **T1.8 : code terminé, testé unitairement et déployé sur le staging ; vérification par achat réel en attente de `config/entreprise.ts`.** Ne débloque pas encore T1.10 ni T1.16 tant que ce dernier point n'est pas vérifié.
+
+### 17/09/2026 — Infos équipe (AGENTS.md, config/entreprise.ts)
+- **AGENTS.md section 0 remplie par l'équipe** : marque **PartyHunter**, domaine `partyhunter.shop` (DNS Hostinger, déjà résolu), email de contact `teampartyhunter@partyhunter.shop`, validations par Telegram. Statut d'entreprise précisé : micro-entreprise, nom « lpenterprise » (raison sociale exacte à reconfirmer).
+- **`config/entreprise.ts` mis à jour avec les champs désormais connus** (raison sociale, forme juridique, email de contact) — `SIRET`, adresse, médiateur et hébergeur restent `"À COMPLÉTER"` (dossier de micro-entreprise en cours), donc `SALES_ENABLED=true` reste bloqué par D11. Commité, poussé sur GitHub.
+
+### 17/09/2026 — T1.9 (agent, en direct, sur le VPS via accès root)
+- **`subscriptions.token_hash`** (migration `0002_add-subscriptions-token.sql`) : un seul jeton par inscription, seul son hash SHA-256 est stocké (même principe que `download_tokens`, T1.8), réutilisé pour la confirmation ET la désinscription. `lib/securite/token.ts` factorise la génération/hash, désormais partagée avec `lib/telechargements/tokens.ts` (T1.8).
+- **Double opt-in générique** (`lib/inscriptions/`, `app/actions/inscriptions.ts`) : jeu gratuit, liste d'attente par jeu, liste d'attente générale, newsletter — un seul mécanisme pour les quatre. Réinscrire une adresse déjà connue régénère un jeton et redemande confirmation (`onConflictDoUpdate` sur la contrainte unique D5), y compris après une désinscription.
+- **`/confirmer/[token]` et `/desinscription/[token]`** : le simple GET n'affiche qu'un bouton, seule l'action serveur du clic (un vrai POST) confirme ou désinscrit. Choix délibéré, au-delà du brief : un scanner de liens dans un client email (Microsoft Safe Links et équivalents) suit automatiquement chaque lien d'un email, ce qui aurait sinon confirmé ou désinscrit des gens à leur place.
+- **`/jeu-gratuit`** : formulaire email + case newsletter non pré-cochée et séparée (brief, point 4). **`/jeu-gratuit/acces`** : mini-jeu factice, clairement annoncé comme tel (même principe que le jeu factice du catalogue, T1.5).
+- **Listes d'attente branchées sur les placeholders déjà laissés par T1.6/T1.7** plutôt que de créer de nouvelles pages : le bouton « Me prévenir de la sortie » de `BlocPrixAction` (par jeu) et l'encart d'accueil « Soyez prévenu de chaque sortie » (liste générale) étaient déjà désactivés en attendant T1.9. Idem pour les pages collections vides (saison à venir, déjà indexables depuis T1.6) : la liste d'attente générale y a été ajoutée plutôt que de créer un nouveau type de page « bientôt disponible ».
+- **Non fait, hors périmètre faute de contenu réel :** une page « bientôt disponible » par **jeu** précis annoncé à l'avance nécessiterait un état de catalogue qui n'existe pas encore (`games.status` n'a que `brouillon`/`publie`) — aucun jeu à venir n'étant fourni pour l'instant, cette infrastructure spéculative n'a pas été construite (voir `docs/A_FAIRE_EQUIPE.md`).
+- **Oubli de T1.8 corrigé au passage :** `.bloc-achat` (bouton Acheter) n'avait pas de CSS ; ajouté avec `.bloc-liste-attente` et `.champ-case` (T1.9).
+- **Vérifié en conditions réelles sur le staging**, pas seulement en test : migration appliquée (service `tools`), image reconstruite, ligne de test insérée directement en base (jeton généré et haché comme le fait l'application) puis retrouvée via `/confirmer/<jeton>` (texte de consentement affiché) et `/desinscription/<jeton>` — jeton inconnu correctement rejeté (« lien invalide ») ; ligne de test supprimée ensuite. Le clic du bouton de confirmation lui-même (action serveur Next.js) n'a pas pu être rejoué contre le staging (le conteneur de l'agent n'a pas accès réseau à ses conteneurs Docker) : mécanique déjà couverte par les tests unitaires, risque résiduel faible car géré par le framework, pas par du code métier.
+- **Régression trouvée et corrigée** : le test E2E `tests/e2e/pages.spec.ts` attendait encore le bouton « Me prévenir de la sortie » désactivé (T1.7) — mis à jour pour attendre un bouton actif, sans achat possible pour autant.
+- **Vérifié :** 120 tests unitaires (8 nouveaux), 27 tests E2E (build + serveur standalone, voir README), lint et TypeScript au vert.
+- **Commité et poussé sur GitHub.**
+- **T1.9 terminée.** Débloque T1.10 (avec T1.8) et T1.16 (avec T1.8).
