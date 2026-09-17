@@ -1144,3 +1144,47 @@ a.hero-badge:hover {
     transform: none;
   }
 }
+
+/* ============================================================
+   ADMIN (T1.10)
+   ============================================================ */
+.admin-nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid var(--ecj-bordure);
+}
+.admin-nav a {
+  font-weight: 700;
+}
+.admin-nav form {
+  margin-left: auto;
+}
+.table-admin {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+}
+.table-admin th,
+.table-admin td {
+  text-align: left;
+  padding: 0.6rem 0.8rem;
+  border-bottom: 1px solid var(--ecj-bordure);
+}
+.table-admin th {
+  font-weight: 800;
+  color: var(--ecj-texte-doux);
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+@media (max-width: 640px) {
+  .table-admin {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+}

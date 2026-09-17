@@ -210,6 +210,31 @@ lien avec `SALES_ENABLED` : celui-là peut changer sans reconstruire.
 - **Sécurité :** l'installation par défaut d'Umami utilise `admin` / `umami`
   — à changer dans son interface avant toute exposition, même limitée.
 
+## Admin (T1.10)
+
+Compte unique, nominatif (décision de l'équipe le 17/09/2026 : micro-entreprise,
+un seul admin). Aucun script ne choisit le mot de passe à votre place.
+
+**Créer ou changer le mot de passe du compte admin**, sur le VPS (jamais en
+local, pour ne jamais faire transiter le mot de passe ailleurs que dans votre
+propre terminal SSH) :
+
+```bash
+cd /root/apps/e-com-jdr-staging
+ADMIN_EMAIL="votre@email" ADMIN_PASSWORD="au moins 12 caractères" \
+  docker compose -f docker/docker-compose.yml --env-file .env --profile tools \
+  run --rm -e ADMIN_EMAIL -e ADMIN_PASSWORD tools npm run create-admin
+```
+
+Rejouable : relancer avec un nouveau mot de passe le met simplement à jour.
+
+**Se connecter** : `https://srv1214588.taild2e4d0.ts.net:8444/admin/connexion`
+(tailnet uniquement, comme le reste du staging). `/admin/*` n'est jamais
+indexé, y compris une fois le site public (T2.4).
+
+`ADMIN_SESSION_SECRET` (`.env`) signe les sessions : la changer déconnecte
+tout le monde immédiatement, utile en cas de doute sur sa confidentialité.
+
 ## Sécurité et sauvegardes (T1.15)
 
 **En-têtes de sécurité** (`lib/securite/entetes.ts`) : CSP, HSTS,
