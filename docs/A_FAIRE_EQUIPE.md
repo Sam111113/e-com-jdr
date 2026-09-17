@@ -36,10 +36,11 @@
 
 ## Phase 1 — Urgent (bloque des tâches)
 
-- [ ] **Créer un compte Stripe** (même non activé, le mode test suffit) et écrire les clés **test** dans le `.env` du VPS. *Nécessaire pour T1.8.*
-- [ ] **Installer Stripe CLI dans le conteneur de l'agent** (image `opencode-local`) avant T1.8 : le staging n'étant pas joignable par Stripe, les webhooks passent par `stripe listen --forward-to`.
-- [ ] **Créer un compte Brevo** et écrire la clé API dans le `.env` du VPS. *Nécessaire pour T1.9.*
+- [x] **Créer un compte Stripe** (même non activé, le mode test suffit) et écrire les clés **test** dans le `.env` du VPS. *Fait — `STRIPE_SECRET_KEY`/`STRIPE_PUBLISHABLE_KEY` présentes et au bon format.*
+- [x] **Installer Stripe CLI** sur le VPS (`stripe` v1.50.11 disponible). ⚠️ **`STRIPE_WEBHOOK_SECRET` dans le `.env` du staging était une valeur invalide** (ne correspondait à aucun format Stripe reconnu, `stripe listen --print-secret` donne une tout autre valeur) — corrigée par l'agent le 17/09/2026 ; à vérifier que c'est bien la bonne avant le premier vrai webhook.
+- [ ] **Créer un compte Brevo** et écrire la clé API dans le `.env` du VPS. *Nécessaire pour T1.9.* (`BREVO_API_KEY`/`EMAIL_EXPEDITEUR`/`CONTACT_EMAIL_DESTINATAIRE` déjà présentes — à confirmer qu'elles sont bien valides, non testé par l'agent.)
 - [ ] **Choisir la destination des sauvegardes hors du VPS** (T1.15) : service externe (ex. Backblaze B2, autre serveur) — création de compte par l'équipe si besoin.
+- [ ] **Nouveau (T1.8) : remplir `config/entreprise.ts`**, même avec des valeurs provisoires mais réelles (pas `"À COMPLÉTER"`), pour pouvoir tester un achat complet sur le staging. Le garde-fou D11 (volontaire, T1.7) refuse de construire l'image avec `SALES_ENABLED=true` tant qu'un champ reste provisoire — **et refuse aussi explicitement que l'agent le contourne avec de fausses valeurs**, y compris pour un test staging. Sans ce champ rempli, T1.8 reste vérifié uniquement par les tests automatisés (112 tests, tous au vert), pas par un achat réel de bout en bout. Cette tâche est la même que celle déjà notée côté "Décisions" pour la société (SIRET, etc.) — la remplir, même provisoirement, débloque aussi T1.11.
 
 ## Phase 1 — Non bloquant
 

@@ -9,17 +9,17 @@
 | T1.3 | Socle technique et staging | **Terminée — déployée et vérifiée par l'équipe le 15/09** (`https://srv1214588.taild2e4d0.ts.net:8444`, tailnet uniquement) | Agent (worktree `main`, port 3100) |
 | T1.4 | Directions visuelles **[VALIDATION ÉQUIPE]** | **Terminée — direction B choisie le 15/09, avec thème sombre automatique en plus (D14)** | Agent (branche `t1.4-design`, fusionnée) |
 | T1.5 | Base de données et import des jeux | **Terminée — migrations et import vérifiés sur le staging le 15/09** | Agent, terminée par l'équipe (session interrompue pour budget) |
-| T1.6 | Pages du site | À faire | — |
-| T1.7 | Interrupteur de vente et configuration légale | À faire | — |
-| T1.8 | Achat et livraison (Stripe test) | À faire | — |
+| T1.6 | Pages du site | **Terminée le 16/09** | Agent, en direct |
+| T1.7 | Interrupteur de vente et configuration légale | **Terminée le 16/09** | Agent, en direct |
+| T1.8 | Achat et livraison (Stripe test) | **Code terminé le 17/09, déployé sur le staging (ventes toujours fermées) ; achat réel non vérifié — bloqué sur `config/entreprise.ts` (voir A_FAIRE_EQUIPE.md)** | Agent, en direct |
 | T1.9 | Jeu gratuit, listes d'attente et newsletter | À faire | — |
-| T1.10 | Admin minimale | À faire | — |
+| T1.10 | Admin minimale | À faire — dépend de T1.9 | — |
 | T1.11 | Brouillons des pages légales | À faire | — |
-| T1.12 | SEO technique | À faire | — |
+| T1.12 | SEO technique | **Terminée le 16/09** | Agent, en direct |
 | T1.13 | Mots-clés et calendrier éditorial | **Structure validée le 15/09 (D17) ; 3 articles réécrits par l'équipe, en attente du feu vert final avant publication** | Agent, articles réécrits par l'équipe |
-| T1.14 | Statistiques de visite | À faire | — |
-| T1.15 | Sécurité, sauvegardes, surveillance | À faire | — |
-| T1.16 | Tests automatisés | À faire | — |
+| T1.14 | Statistiques de visite | **Terminée le 16/09** | Agent, en direct |
+| T1.15 | Sécurité, sauvegardes, surveillance | **Quasi terminée le 16/09** — reste le compte Uptime Kuma et la destination des sauvegardes (équipe) | Agent, en direct |
+| T1.16 | Tests automatisés | À faire — dépend de T1.8 et T1.9 | — |
 
 ---
 
@@ -201,3 +201,18 @@
 - **Critère « une alerte de test a bien été reçue » non vérifiable par l'agent** tant que le compte Uptime Kuma et une notification ne sont pas configurés — c'est le seul point de T1.15 qui reste réellement ouvert.
 - **Vérifié :** 91 tests unitaires (7 nouveaux), 27 tests E2E toujours au vert avec les en-têtes de sécurité actifs, lint et TypeScript au vert.
 - **T1.15 quasi terminée** — reste seulement la configuration du compte Uptime Kuma et de sa notification (équipe), et la destination des sauvegardes hors VPS (équipe).
+
+### 17/09/2026 — T1.8 (agent, en direct, sur le VPS via accès root plutôt que le conteneur opencode)
+- **Session Stripe Checkout** (`lib/commandes/creer-session-checkout.ts`, `app/api/checkout/route.ts`) : `price_data` depuis `games.prixEur` (aucune synchronisation de catalogue), consentement obligatoire via `consent_collection`/`custom_text` (accès immédiat + renonciation au droit de rétractation), route protégée par `ventesActives()` et un limiteur dédié.
+- **Webhook** (`app/api/webhooks/stripe/route.ts`, `lib/commandes/traitement-webhook.ts`) : signature vérifiée avant tout traitement ; `checkout.session.completed` idempotent via `orders.stripe_session_id` unique (`onConflictDoNothing`) — un événement livré deux fois ne crée jamais deux commandes, deux factures ni deux emails (vérifié par test) ; `charge.refunded` retrouve la session via `stripe.checkout.sessions.list({payment_intent})` (aucune colonne supplémentaire nécessaire), émet un avoir et révoque les jetons de téléchargement de la commande.
+- **Téléchargement** (`lib/telechargements/tokens.ts`, `app/telecharger/[token]/route.ts`) : jeton de 32 octets, seul son hash SHA-256 est stocké ; validation et incrément du compteur dans la même requête `UPDATE ... WHERE downloadCount < maxDownloads` pour rester correct sous course concurrente (vérifié par test : deux téléchargements simultanés sur le dernier essai, un seul passe). Filigrane (email de l'acheteur, pdf-lib) apposé à chaque téléchargement, jamais stocké sur le PDF d'origine.
+- **Factures** (`lib/factures/`) : numérotation par compteur transactionnel déjà en place depuis T1.5 (D8), format `F-000001`/`A-000001` repris de l'exemple du schéma — **toujours à faire valider par le comptable** (`docs/A_FAIRE_EQUIPE.md`, déjà noté avant cette session). PDF minimal (pdf-lib) avec `legalSnapshot` figé à l'émission. Avoir jamais une suppression : nouvelle ligne qui référence `credited_invoice_id`.
+- **Page de confirmation et « Retrouver mes téléchargements »** : les jetons en clair n'étant jamais stockés, chaque visite régénère de nouveaux liens plutôt que de retrouver les anciens (les anciens restent valables jusqu'à leur propre expiration/quota). Message identique que l'email existe ou non.
+- **`.env.example` corrigé** : les variables Stripe (`STRIPE_SECRET_KEY`, `STRIPE_PUBLISHABLE_KEY`, `STRIPE_WEBHOOK_SECRET`) manquaient alors que `.env` les avait déjà — contraire à la règle « aucun secret sans `.env.example` ».
+- **Bug trouvé en testant l'image Docker, pas en relisant le code :** `next build` échouait dans le Dockerfile (jamais vu avec `npm run build` en direct dans le conteneur de l'agent, où `DEV_DATABASE_URL` masquait le problème) — le webhook, la route de téléchargement et l'action « retrouver mes téléchargements » importaient `db/client.ts` en haut de fichier au lieu d'un import différé (même piège que celui déjà documenté dans `lib/games/queries.ts` pour T1.6). Corrigé, image Docker reconstruite avec succès.
+- **`STRIPE_WEBHOOK_SECRET` invalide trouvé dans le `.env` du staging** (ne correspondait à aucun format Stripe reconnu) — corrigé avec la vraie valeur de `stripe listen --print-secret`, stable pour cet appareil (vérifié par deux appels).
+- **Déployé sur le staging, ventes toujours fermées** (`SALES_ENABLED=false`) : build et démarrage vérifiés, fiche jeu affiche toujours honnêtement « Me prévenir de la sortie » (T1.9 pas encore fait), page `/retrouver-mes-telechargements` répond 200.
+- **Non vérifié par un achat réel : bloqué sur `config/entreprise.ts`.** Le garde-fou D11 (T1.7, volontaire) refuse de construire l'image avec `SALES_ENABLED=true` tant qu'un champ de la configuration légale reste au marqueur `"À COMPLÉTER"` — et refuse aussi explicitement que l'agent le contourne avec de fausses valeurs, y compris pour un test staging non commité. C'est le comportement voulu (ne jamais fabriquer d'informations légales), mais ça veut dire que le critère « achat test complet sur le staging » du brief ne pourra être vérifié qu'une fois `config/entreprise.ts` rempli, même provisoirement (voir `docs/A_FAIRE_EQUIPE.md`).
+- **Vérifié :** 112 tests unitaires (21 nouveaux : webhook/idempotence/remboursement, jetons de téléchargement dont la course concurrente, numérotation et émission des factures/avoirs, filigrane, paramètres de la session Checkout), lint et TypeScript au vert, `next build` réussi en local et dans l'image Docker.
+- **Commité** (`a9d7f20`, `d194d3b`) sur le dépôt local des agents (`/root/workspace/e-com-jdr`), **pas encore poussé sur GitHub** — en attente de confirmation.
+- **T1.8 : code terminé, testé unitairement et déployé sur le staging ; vérification par achat réel en attente de `config/entreprise.ts`.** Ne débloque pas encore T1.10 ni T1.16 tant que ce dernier point n'est pas vérifié.
