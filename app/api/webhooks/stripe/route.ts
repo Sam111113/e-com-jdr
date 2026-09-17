@@ -6,7 +6,6 @@
 // section 8) : utiliser `stripe listen --forward-to localhost:3000/api/webhooks/stripe`.
 import Stripe from "stripe";
 import { getStripeClient } from "@/lib/stripe/client";
-import { db } from "@/db/client";
 import { storage } from "@/lib/storage";
 import { envoyerEmailCommandeParBrevo } from "@/lib/emails/commande";
 import { baseUrl } from "@/lib/seo/site-url";
@@ -50,6 +49,10 @@ export async function POST(requete: Request): Promise<Response> {
     return Response.json({ erreur: "Signature invalide." }, { status: 400 });
   }
 
+  // Import à la demande : `db/client.ts` exige une URL de base de données
+  // dès son chargement, ce que le build Docker n'a pas (voir
+  // lib/games/queries.ts, même raison).
+  const { db } = await import("@/db/client");
   const deps = {
     db,
     storage,

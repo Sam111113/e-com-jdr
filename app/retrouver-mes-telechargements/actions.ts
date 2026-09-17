@@ -2,7 +2,6 @@
 
 import { headers } from "next/headers";
 import { z } from "zod";
-import { db } from "@/db/client";
 import { creerLimiteurParIp } from "@/lib/securite/limiteur";
 import { trouverCommandesPayeesParEmail } from "@/lib/commandes/recherche";
 import { creerLiensPourCommande } from "@/lib/telechargements/tokens";
@@ -42,6 +41,9 @@ export async function demanderNouveauxLiens(
     return { statut: "erreur", message: analyse.error.issues[0]?.message ?? "Email invalide." };
   }
 
+  // Import à la demande (voir lib/games/queries.ts, même raison : db/client.ts
+  // exige une URL de base de données dès son chargement, absente au build Docker).
+  const { db } = await import("@/db/client");
   const idsCommandes = await trouverCommandesPayeesParEmail(db, analyse.data.email);
   const site = baseUrl().toString().replace(/\/$/, "");
 

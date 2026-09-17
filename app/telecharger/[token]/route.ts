@@ -2,7 +2,6 @@
 // filigrane avec l'email de l'acheteur, puis sert le fichier. Jamais servi
 // en statique : le kit vit dans le stockage privé (lib/storage), inaccessible
 // autrement que par ce jeton à usage limité.
-import { db } from "@/db/client";
 import { storage } from "@/lib/storage";
 import { validerEtConsommerToken, type EchecTelechargement } from "@/lib/telechargements/tokens";
 import { apposerFiligrane } from "@/lib/telechargements/filigrane";
@@ -19,6 +18,9 @@ export async function GET(
   { params }: { params: Promise<{ token: string }> },
 ): Promise<Response> {
   const { token } = await params;
+  // Import à la demande (voir lib/games/queries.ts, même raison : db/client.ts
+  // exige une URL de base de données dès son chargement, absente au build Docker).
+  const { db } = await import("@/db/client");
   const resultat = await validerEtConsommerToken(db, token);
 
   if (!resultat.ok || !resultat.jeu) {
