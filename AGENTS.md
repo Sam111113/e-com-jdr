@@ -9,15 +9,15 @@
 ## 0. Informations à compléter (par l'équipe)
 
 ### Tout de suite
-- **Nom de la marque :** [À COMPLÉTER]
-- **Domaine :** [À COMPLÉTER]. DNS géré chez : [OVH / Cloudflare / autre]
-- **Email de contact public :** [À COMPLÉTER]
-- **Dépôt Git distant :** [URL, ou « aucun, Git local »]
-- **Contact pour les validations :** [prénom + canal : Discord, email…]
+- **Nom de la marque :** PartyHunter
+- **Domaine :** partyhunter.shop. DNS géré chez : hostinger
+- **Email de contact public :** teampartyhunter@partyhunter.shop
+- **Dépôt Git distant :** (https://github.com/Sam111113/e-com-jdr)
+- **Contact pour les validations :** telegram
 
 ### Plus tard (phase 3 : ouverture des ventes)
 N'attends pas ces informations pour avancer. En attendant, mets des **valeurs provisoires regroupées dans un seul fichier de configuration** (voir section 4).
-- **Infos légales :** nom, statut (micro-entreprise / SAS), SIRET, adresse, régime de TVA
+- **Infos légales :** lpenterprise, statut micro-entreprise, SIRET, adresse, régime de TVA
 - **Médiateur de la consommation**
 - **Clés Stripe live**
 

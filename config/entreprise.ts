@@ -12,14 +12,18 @@
 export const MARQUEUR_A_COMPLETER = "À COMPLÉTER";
 
 export const entreprise = {
+  // Renseigné depuis AGENTS.md section 0 (17/09/2026) : nom exact à
+  // reconfirmer par l'équipe au moment du dépôt réel (micro-entreprise :
+  // la raison sociale légale est en général le nom propre du déclarant,
+  // "lpenterprise" n'en est peut-être que le nom commercial).
   /** Raison sociale exacte (peut différer du nom commercial de config/site.ts). */
-  raisonSociale: MARQUEUR_A_COMPLETER,
+  raisonSociale: "lpenterprise",
   /** Ex. "Micro-entreprise", "SASU", "SAS". */
-  formeJuridique: MARQUEUR_A_COMPLETER,
+  formeJuridique: "Micro-entreprise",
   siret: MARQUEUR_A_COMPLETER,
   adresse: MARQUEUR_A_COMPLETER,
   /** Email de contact affiché dans les mentions légales et les factures. */
-  emailContact: MARQUEUR_A_COMPLETER,
+  emailContact: "teampartyhunter@partyhunter.shop",
 
   regimeTva: {
     // Hypothèse par défaut (micro-entreprise, franchise en base) : à
