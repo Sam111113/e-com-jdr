@@ -232,7 +232,9 @@ cd /root/apps/e-com-jdr-staging
 set -a && . ./.env && set +a
 ./docker/sauvegarde.sh
 # Écrit postgres-<date>.dump et prive-<date>.tar.gz dans
-# /root/sauvegardes-ecomjdr/, purge tout ce qui a plus de 14 jours.
+# /root/sauvegardes-ecomjdr/, purge tout ce qui a plus de 14 jours, puis
+# copie vers Backblaze B2 si B2_BUCKET/B2_KEY_ID/B2_APPLICATION_KEY sont
+# renseignées dans `.env` (rclone, installé sur ce VPS — voir `.env.example`).
 ```
 
 **Restauration** (testée le 16/09/2026, sans toucher aux données de
