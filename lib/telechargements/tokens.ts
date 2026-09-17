@@ -13,6 +13,25 @@ import { genererToken, hasherToken } from "@/lib/securite/token";
 export { genererToken, hasherToken };
 
 const JOURS_EXPIRATION = 7;
+
+/**
+ * Révoque un jeton de téléchargement (met `revoked_at = now()`).
+ * Idempotent : révoquer un jeton déjà révoqué ne fait rien et retourne `true`.
+ */
+export async function revoquerToken(db: Database, downloadTokenId: number): Promise<boolean> {
+  const [ligne] = await db
+    .update(downloadTokens)
+    .set({ revokedAt: new Date() })
+    .where(
+      and(
+        eq(downloadTokens.id, downloadTokenId),
+        isNull(downloadTokens.revokedAt),
+      ),
+    )
+    .returning({ id: downloadTokens.id });
+  return ligne !== undefined;
+}
+
 const TELECHARGEMENTS_MAX = 5;
 
 export interface LienTelechargement {

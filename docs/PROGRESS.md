@@ -13,7 +13,7 @@
 | T1.7 | Interrupteur de vente et configuration légale | **Terminée le 16/09** | Agent, en direct |
 | T1.8 | Achat et livraison (Stripe test) | **Code terminé le 17/09, déployé sur le staging (ventes toujours fermées) ; achat réel non vérifié — bloqué sur `config/entreprise.ts` (voir A_FAIRE_EQUIPE.md)** | Agent, en direct |
 | T1.9 | Jeu gratuit, listes d'attente et newsletter | **Terminée le 17/09** — déployée et vérifiée sur le staging | Agent, en direct |
-| T1.10 | Admin minimale | **Fondations terminées le 17/09** (auth, session, protection) ; reste le tableau de bord et les pages de données (commandes, listes d'attente) | Agent, en direct |
+| T1.10 | Admin minimale | **Terminée le 17/09** — toutes les pages construites | Agent, en direct |
 | T1.11 | Brouillons des pages légales | À faire | — |
 | T1.12 | SEO technique | **Terminée le 16/09** | Agent, en direct |
 | T1.13 | Mots-clés et calendrier éditorial | **Structure validée le 15/09 (D17) ; 3 articles réécrits par l'équipe, en attente du feu vert final avant publication** | Agent, articles réécrits par l'équipe |
@@ -253,3 +253,16 @@
 - **Vérifié :** 127 tests unitaires (7 nouveaux), lint, TypeScript et build au vert.
 - **Commité et poussé sur GitHub.**
 - **T1.10 fondations terminées.** Reste le contenu des pages avant de clore la tâche.
+
+### 17/09/2026 — T1.10, pages admin (tableau de bord, commandes, listes d'attente)
+
+- **`lib/telechargements/tokens.ts`** : ajout de `revoquerToken(db, downloadTokenId)` — pose `revoked_at = now()`, idempotent (retourne `false` si déjà révoqué ou inexistant). 3 tests unitaires : révocation d'un token actif confirmée par `validerEtConsommerToken` qui répond `"revoque"`, idempotence, et jeton inexistant.
+- **`app/admin/(protege)/page.tsx`** (tableau de bord) : remplace le message de bienvenue par un tableau des ventes par jeu — jointure `order_items` + `games` + `orders` filtré `status = 'paid'`, groupé par jeu, avec total en centimes formaté par `formaterPrix`. Affiche le total général en haut.
+- **`app/admin/(protege)/commandes/page.tsx`** : liste des commandes triées par date décroissante — email client, date, montant, statut, jeux achetés et actions. **Client component** `BoutonsCommande.tsx` pour les interactions : bouton **Renvoyer les liens** (appelle `creerLiensPourCommande` puis `envoyerEmailCommandeParBrevo`) et état des jetons (actif / expiré / révoqué / quota atteint) avec bouton **Révoquer** pour ceux encore actifs.
+- **`app/admin/(protege)/commandes/actions.ts`** : Server Actions `renvoyerLiens(orderId)` et `revoquerJetonAdmin(downloadTokenId)`, toutes deux protégées par `verifierSession()` qui lit le cookie `session_admin` et utilise `verifierJetonSession` (même contrôle que le layout).
+- **`app/admin/(protege)/listes-attente/page.tsx`** : inscriptions `liste_attente` groupées par jeu (`gameId`, null = liste générale) — email, date d'inscription, confirmée ou non, désinscrite ou non. Un tableau par groupe.
+- **Respect des conventions :** import différé de `db/client`, `connection()` avant l'import, `formaterPrix` pour les montants, noms en français, pas de nouvelle dépendance.
+- **Vérifié :** 130 tests unitaires (3 nouveaux pour `revoquerToken` + 127 existants), lint, TypeScript et build au vert. Aucun test existant cassé.
+- **Non vérifié sur le staging :** le conteneur de l'agent n'a pas accès réseau aux conteneurs Docker du staging. Les actions serveur avec formulaires (renvoi de liens, révocation) n'ont pas été rejouées contre le staging, mais la mécanique est identique à celle déjà vérifiée de `connexion/actions.ts` (même `verifierSession`, même `useActionState`).
+- **Commité localement** (pas poussé sur GitHub — une autre session s'en charge après relecture).
+- **T1.10 terminée.**

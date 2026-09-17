@@ -1,15 +1,73 @@
-// Tableau de bord admin (T1.10). Contenu (ventes par jeu) à compléter :
-// voir app/admin/commandes et app/admin/listes-attente pour le détail.
-import Link from "next/link";
+import { connection } from "next/server";
+import { eq, sql as sqlFn } from "drizzle-orm";
+import { games, orderItems, orders } from "@/db/schema";
+import { formaterPrix } from "@/lib/games/format";
 
-export default function TableauDeBordAdmin() {
+interface VentesParJeu {
+  titre: string;
+  slug: string;
+  commandes: number;
+  totalCentimes: number;
+}
+
+async function chargerVentesParJeu(): Promise<VentesParJeu[]> {
+  await connection();
+  const { db } = await import("@/db/client");
+
+  const lignes = await db
+    .select({
+      titre: games.title,
+      slug: games.slug,
+      commandes: sqlFn<number>`count(*)::int`,
+      totalCentimes: sqlFn<number>`coalesce(sum(${orders.amountTotal}), 0)`,
+    })
+    .from(orderItems)
+    .innerJoin(orders, eq(orderItems.orderId, orders.id))
+    .innerJoin(games, eq(orderItems.gameId, games.id))
+    .where(eq(orders.status, "paid"))
+    .groupBy(games.id, games.title, games.slug)
+    .orderBy(sqlFn`count(*) desc`);
+
+  return lignes.map((l) => ({
+    titre: l.titre,
+    slug: l.slug,
+    commandes: l.commandes,
+    totalCentimes: Number(l.totalCentimes),
+  }));
+}
+
+export default async function TableauDeBordAdmin() {
+  const ventes = await chargerVentesParJeu();
+  const totalGlobal = ventes.reduce((s, v) => s + v.totalCentimes, 0);
+
   return (
     <>
       <h1>Tableau de bord</h1>
-      <p>
-        Bienvenue. Consultez les <Link href="/admin/commandes">commandes</Link> ou les{" "}
-        <Link href="/admin/listes-attente">listes d&apos;attente</Link>.
-      </p>
+      {ventes.length === 0 ? (
+        <p>Aucune vente pour le moment.</p>
+      ) : (
+        <>
+          <p className="note">Total des ventes payées : {formaterPrix(totalGlobal)}</p>
+          <table className="table-admin">
+            <thead>
+              <tr>
+                <th>Jeu</th>
+                <th className="nb">Commandes</th>
+                <th className="nb">Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              {ventes.map((v) => (
+                <tr key={v.slug}>
+                  <td>{v.titre}</td>
+                  <td className="nb">{v.commandes}</td>
+                  <td className="nb">{formaterPrix(v.totalCentimes)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </>
+      )}
     </>
   );
 }

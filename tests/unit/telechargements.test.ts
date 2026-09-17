@@ -8,6 +8,7 @@ import { downloadTokens, games, orderItems, orders } from "../../db/schema";
 import {
   creerLienTelechargement,
   hasherToken,
+  revoquerToken,
   validerEtConsommerToken,
 } from "../../lib/telechargements/tokens";
 
@@ -154,6 +155,58 @@ describe("validerEtConsommerToken", () => {
       ]);
       const reussites = [premier, second].filter((r) => r.ok);
       expect(reussites).toHaveLength(1);
+    } finally {
+      await sql.end();
+    }
+  });
+});
+
+describe("revoquerToken", () => {
+  it("révoque un jeton actif et le rend invalide", async () => {
+    const { db, sql } = createTestDb();
+    try {
+      const orderItemId = await creerOrderItem(db, "rev-active");
+      const token = await creerLienTelechargement(db, orderItemId);
+
+      const [ligne] = await db
+        .select({ id: downloadTokens.id })
+        .from(downloadTokens)
+        .where(eq(downloadTokens.tokenHash, hasherToken(token)));
+
+      const resultat = await revoquerToken(db, ligne.id);
+      expect(resultat).toBe(true);
+
+      const verification = await validerEtConsommerToken(db, token);
+      expect(verification).toEqual({ ok: false, echec: "revoque" });
+    } finally {
+      await sql.end();
+    }
+  });
+
+  it("est idempotent : révoquer deux fois retourne false la seconde fois", async () => {
+    const { db, sql } = createTestDb();
+    try {
+      const orderItemId = await creerOrderItem(db, "rev-idem");
+      const token = await creerLienTelechargement(db, orderItemId);
+
+      const [ligne] = await db
+        .select({ id: downloadTokens.id })
+        .from(downloadTokens)
+        .where(eq(downloadTokens.tokenHash, hasherToken(token)));
+
+      await revoquerToken(db, ligne.id);
+      const second = await revoquerToken(db, ligne.id);
+      expect(second).toBe(false);
+    } finally {
+      await sql.end();
+    }
+  });
+
+  it("retourne false pour un jeton inexistant", async () => {
+    const { db, sql } = createTestDb();
+    try {
+      const resultat = await revoquerToken(db, 99999);
+      expect(resultat).toBe(false);
     } finally {
       await sql.end();
     }
