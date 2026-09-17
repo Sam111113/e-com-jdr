@@ -22,11 +22,8 @@
 - [x] **Pages du site livrées** (T1.6) : accueil, catalogue filtrable, fiche jeu, pages collections (D17), pages annexes. Détail dans `docs/PROGRESS.md`.
 - [x] **Interrupteur de vente en place** (T1.7) : `config/entreprise.ts` centralise désormais toutes les infos légales à compléter (voir ligne juste en dessous). Le bouton « Acheter » ne s'activera qu'une fois ces champs remplis **et** le site reconstruit (`SALES_ENABLED=true`) — un simple `.env` ne suffit pas (D11, D19), volontairement.
 - [x] **SEO technique en place** (T1.12) : sitemap, robots.txt, canonical, Open Graph/Twitter Card, données structurées (JSON-LD), redirections automatiques quand un slug change. Rien à indexer avant `T2.4` (mise en ligne publique) : le staging reste protégé par mot de passe (D13, D20).
-- [x] **Statistiques Umami branchées** (T1.14) : visites et événement de contact remontent déjà. **Reste à faire par vous :** changer le mot de passe administrateur d'Umami, resté aux identifiants par défaut (`admin` / `umami`) — l'agent n'a pas le droit de modifier un mot de passe lui-même. Accessible en SSH sur le VPS via `http://127.0.0.1:3001` (ou en tunnel SSH depuis votre poste).
-- [x] **Sécurité et sauvegardes en place** (T1.15) : en-têtes de sécurité, limiteur de requêtes, sauvegardes quotidiennes avec restauration réellement testée (voir `docs/PROGRESS.md`). **Reste à faire par vous :**
-  - **Créer le compte administrateur d'Uptime Kuma** : `https://srv1214588.taild2e4d0.ts.net:8445` (sur le tailnet), assistant de premier lancement — 30 secondes. L'agent ne peut pas choisir ce mot de passe à votre place.
-  - **Ajouter un moniteur** pour `https://srv1214588.taild2e4d0.ts.net:8444` et **configurer une notification** (email, Discord, Telegram… au choix dans Uptime Kuma) puis **envoyer une alerte de test** — c'est le seul point qui manque encore pour clore T1.15.
-  - **Choisir la destination des sauvegardes hors du VPS** (déjà listé plus bas) : sans elle, les sauvegardes ne survivraient pas à la perte du VPS lui-même.
+- [x] **Statistiques Umami branchées** (T1.14) : visites et événement de contact remontent déjà. **Mot de passe Umami changé le 17/09/2026.**
+- [x] **Sécurité et sauvegardes en place** (T1.15) : en-têtes de sécurité, limiteur de requêtes, sauvegardes quotidiennes avec restauration réellement testée (voir `docs/PROGRESS.md`). **Compte admin Uptime Kuma créé le 17/09/2026.** Reste à confirmer que le moniteur + la notification + l'alerte de test sont bien en place (fait de votre côté, pas revérifié par l'agent qui n'a pas accès à l'interface Uptime Kuma).
 
 ## Pour chaque nouveau jeu (créateur des jeux)
 
@@ -38,9 +35,9 @@
 
 - [x] **Créer un compte Stripe** (même non activé, le mode test suffit) et écrire les clés **test** dans le `.env` du VPS. *Fait — `STRIPE_SECRET_KEY`/`STRIPE_PUBLISHABLE_KEY` présentes et au bon format.*
 - [x] **Installer Stripe CLI** sur le VPS (`stripe` v1.50.11 disponible). ⚠️ **`STRIPE_WEBHOOK_SECRET` dans le `.env` du staging était une valeur invalide** (ne correspondait à aucun format Stripe reconnu, `stripe listen --print-secret` donne une tout autre valeur) — corrigée par l'agent le 17/09/2026 ; à vérifier que c'est bien la bonne avant le premier vrai webhook.
-- [ ] **Créer un compte Brevo** et écrire la clé API dans le `.env` du VPS. *Nécessaire pour T1.9, désormais codée et déployée.* (`BREVO_API_KEY`/`EMAIL_EXPEDITEUR`/`CONTACT_EMAIL_DESTINATAIRE` déjà présentes — **toujours pas confirmé par un vrai envoi** : l'agent n'a testé que la logique de double opt-in en base, pas l'appel réel à l'API Brevo, pour ne pas envoyer un email sans autorisation explicite. Un vrai test d'inscription sur `/jeu-gratuit` avec une adresse à vous confirmerait les deux d'un coup.)
-- [ ] **Choisir la destination des sauvegardes hors du VPS** (T1.15) : service externe (ex. Backblaze B2, autre serveur) — création de compte par l'équipe si besoin.
-- [ ] **Nouveau (T1.8) : remplir `config/entreprise.ts`**, même avec des valeurs provisoires mais réelles (pas `"À COMPLÉTER"`), pour pouvoir tester un achat complet sur le staging. Le garde-fou D11 (volontaire, T1.7) refuse de construire l'image avec `SALES_ENABLED=true` tant qu'un champ reste provisoire — **et refuse aussi explicitement que l'agent le contourne avec de fausses valeurs**, y compris pour un test staging. Sans ce champ rempli, T1.8 reste vérifié uniquement par les tests automatisés (112 tests, tous au vert), pas par un achat réel de bout en bout. Cette tâche est la même que celle déjà notée côté "Décisions" pour la société (SIRET, etc.) — la remplir, même provisoirement, débloque aussi T1.11.
+- [ ] ⚠️ **`BREVO_API_KEY` invalide, confirmé par un vrai test le 17/09/2026** (inscription réelle sur `/jeu-gratuit`, réponse Brevo : `401`). Le double opt-in fonctionne bien de bout en bout côté site (l'inscription en base est créée), mais aucun email de confirmation ne peut réellement partir tant que cette clé n'est pas corrigée. Régénérer une clé API valide dans Brevo et la remplacer dans le `.env` du staging.
+- [x] **Destination des sauvegardes hors du VPS choisie : Backblaze B2** (17/09/2026). `rclone` installé sur le VPS, `docker/sauvegarde.sh` sait déjà copier vers B2 — **reste à renseigner `B2_BUCKET`/`B2_KEY_ID`/`B2_APPLICATION_KEY` dans le `.env` du staging** (lignes déjà présentes, vides). Utilisez une "Application Key" B2 dédiée à ce bucket, jamais la clé maître du compte.
+- [ ] **`config/entreprise.ts`** : raison sociale (`raisonSociale: "lpenterprise"`, à reconfirmer — pour une micro-entreprise la raison sociale légale est en général le nom propre du déclarant), forme juridique et email de contact déjà renseignés (17/09). **SIRET, adresse, médiateur et hébergeur restent à compléter** une fois le dossier de micro-entreprise abouti — c'est ce qui bloque encore `SALES_ENABLED=true` (D11) et donc la vérification d'un achat réel sur le staging (T1.8 reste vérifié uniquement par les 127 tests automatisés en attendant).
 
 ## Phase 1 — Non bloquant
 
@@ -52,7 +49,7 @@
 
 - [ ] **Valider la structure des pages collections** que l'agent proposera en révisant T1.13 pour couvrir plusieurs types de jeu (D15). *Nécessaire avant T1.6.*
 - [ ] **Fournir le premier vrai jeu** (fiche + PDF + visuels) vers le 01/10. En attendant, l'agent utilise un jeu factice clairement marqué comme tel.
-- [ ] **Décider du modèle d'authentification admin** (T1.10) : compte partagé simple ou comptes nominatifs ? *T1.8 et T1.9 étant terminées, T1.10 n'attend plus que cette décision.*
+- [x] **Modèle d'authentification admin décidé** (T1.10, 17/09/2026) : compte unique et nominatif (micro-entreprise, un seul admin). Fondations codées et déployées (connexion, session, protection des pages). **Reste à faire par vous : créer votre compte** — voir `README.md`, section « Admin », commande `npm run create-admin` (l'agent ne choisit jamais votre mot de passe).
 
 ## Phase 1 — Plus tard mais à anticiper
 

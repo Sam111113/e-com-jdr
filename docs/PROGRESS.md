@@ -13,12 +13,12 @@
 | T1.7 | Interrupteur de vente et configuration légale | **Terminée le 16/09** | Agent, en direct |
 | T1.8 | Achat et livraison (Stripe test) | **Code terminé le 17/09, déployé sur le staging (ventes toujours fermées) ; achat réel non vérifié — bloqué sur `config/entreprise.ts` (voir A_FAIRE_EQUIPE.md)** | Agent, en direct |
 | T1.9 | Jeu gratuit, listes d'attente et newsletter | **Terminée le 17/09** — déployée et vérifiée sur le staging | Agent, en direct |
-| T1.10 | Admin minimale | À faire — T1.8 et T1.9 terminées, débloquée | — |
+| T1.10 | Admin minimale | **Fondations terminées le 17/09** (auth, session, protection) ; reste le tableau de bord et les pages de données (commandes, listes d'attente) | Agent, en direct |
 | T1.11 | Brouillons des pages légales | À faire | — |
 | T1.12 | SEO technique | **Terminée le 16/09** | Agent, en direct |
 | T1.13 | Mots-clés et calendrier éditorial | **Structure validée le 15/09 (D17) ; 3 articles réécrits par l'équipe, en attente du feu vert final avant publication** | Agent, articles réécrits par l'équipe |
 | T1.14 | Statistiques de visite | **Terminée le 16/09** | Agent, en direct |
-| T1.15 | Sécurité, sauvegardes, surveillance | **Quasi terminée le 16/09** — reste le compte Uptime Kuma et la destination des sauvegardes (équipe) | Agent, en direct |
+| T1.15 | Sécurité, sauvegardes, surveillance | **Terminée le 17/09** — compte Uptime Kuma créé et mot de passe Umami changé (équipe), copie des sauvegardes vers Backblaze B2 codée (agent), clés B2 restent à renseigner | Agent, en direct |
 | T1.16 | Tests automatisés | À faire — T1.8 et T1.9 terminées, débloquée (couverture unitaire déjà en place, reste l'E2E d'achat via Stripe CLI) | — |
 
 ---
@@ -234,3 +234,22 @@
 - **Vérifié :** 120 tests unitaires (8 nouveaux), 27 tests E2E (build + serveur standalone, voir README), lint et TypeScript au vert.
 - **Commité et poussé sur GitHub.**
 - **T1.9 terminée.** Débloque T1.10 (avec T1.8) et T1.16 (avec T1.8).
+
+### 17/09/2026 — Vérification réelle de T1.9 et correctif (agent, en direct)
+- **Vrai test d'inscription rejoué sur le staging** (POST direct reproduisant le protocole des Server Actions Next.js, sans navigateur — le conteneur de l'agent ne peut pas atteindre les conteneurs Docker du staging) : `/jeu-gratuit` avec `teampartyhunter@partyhunter.shop` (adresse fournie par l'équipe, remplace l'adresse personnelle utilisée par erreur dans `EMAIL_EXPEDITEUR`).
+- **Bug trouvé : `BREVO_API_KEY` répond `401`** — clé invalide. Noté dans `docs/A_FAIRE_EQUIPE.md`.
+- **Deuxième bug trouvé par le même test, sans rapport avec le premier : une erreur Brevo non rattrapée faisait planter la requête (500)** au lieu d'afficher le message honnête déjà en place pour le formulaire de contact (T1.6). Corrigé : `app/actions/inscriptions.ts` rattrape l'échec d'envoi, l'inscription au jeu gratuit reste acquise même si la newsletter optionnelle échoue seule. Reproduit une seconde fois après correction : réponse 200 avec le message d'erreur honnête, plus de plantage.
+- **`EMAIL_EXPEDITEUR` corrigé** dans le `.env` du staging (`teampartyhunter@partyhunter.shop`).
+- **Sauvegardes hors du VPS : Backblaze B2 choisi par l'équipe.** `rclone` installé sur le VPS ; `docker/sauvegarde.sh` copie désormais vers B2 via `RCLONE_CONFIG_ECOMJDRB2_*` (pas de fichier de config séparé), sautée proprement tant que `B2_BUCKET`/`B2_KEY_ID`/`B2_APPLICATION_KEY` ne sont pas renseignées dans `.env` (à faire par l'équipe).
+- **Uptime Kuma et Umami confirmés par l'équipe** : compte admin Kuma créé, mot de passe Umami changé.
+
+### 17/09/2026 — T1.10, fondations (agent, en direct)
+- **Décision de l'équipe** : compte admin unique et nominatif (micro-entreprise, un seul admin) — voir `docs/A_FAIRE_EQUIPE.md`.
+- **Mot de passe haché avec `scrypt`** (Node natif, aucune dépendance ajoutée) — `lib/admin/mots-de-passe.ts`. **Session signée par HMAC** (`ADMIN_SESSION_SECRET`, générée par l'agent avec `openssl rand -hex 32` : un secret de signature, pas un mot de passe humain à retenir, donc pas soumis à la même règle) — `lib/admin/session.ts`, sans table de sessions séparée pour un compte unique.
+- **`npm run create-admin`** (`scripts/create-admin.ts`) : lit `ADMIN_EMAIL`/`ADMIN_PASSWORD` dans l'environnement au moment de l'exécution, jamais choisis ni vus par l'agent. Rejouable (met à jour le mot de passe si l'email existe déjà).
+- **`/admin/(protege)`** : groupe de routes protégé, redirige vers `/admin/connexion` si la session est absente/invalide/expirée. `/admin/connexion` volontairement hors de ce groupe (sinon boucle de redirection sur elle-même). `/admin/*` jamais indexé (`robots: noindex`), y compris une fois `SITE_PUBLIC=true` (T2.4) — réglage indépendant de l'indexation générale du site.
+- **Vérifié en conditions réelles sur le staging**, pas seulement en test : compte de test jetable créé (`npm run create-admin` via le service `tools`), connexion rejouée avec le vrai protocole des Server Actions (même technique que la vérification Brevo ci-dessus) — cookie de session bien posé (`HttpOnly`, `Secure`, `SameSite=lax`, `Path=/admin`, expiration à 7 jours), accès au tableau de bord confirmé avec ce cookie, mauvais mot de passe correctement rejeté avec le message générique. Compte de test supprimé ensuite.
+- **Non fait, volontairement laissé pour la suite :** le contenu des pages (tableau de bord avec ventes par jeu, liste des commandes avec renvoi de lien et désactivation d'un jeton de téléchargement, inscrits aux listes d'attente par jeu) — la structure protégée existe, le contenu reste à construire.
+- **Vérifié :** 127 tests unitaires (7 nouveaux), lint, TypeScript et build au vert.
+- **Commité et poussé sur GitHub.**
+- **T1.10 fondations terminées.** Reste le contenu des pages avant de clore la tâche.
