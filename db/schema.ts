@@ -214,6 +214,12 @@ export const subscriptions = pgTable("subscriptions", {
     onDelete: "cascade",
   }),
   consentText: text("consent_text").notNull(),
+  // Un seul jeton par inscription (T1.9), utilisé à la fois pour le lien de
+  // confirmation (double opt-in) et le lien de désinscription de chaque
+  // email : seul son hash SHA-256 est stocké, même principe que
+  // `download_tokens` (T1.8). Régénéré à chaque nouvelle demande
+  // d'inscription (y compris une réinscription après désinscription).
+  tokenHash: text("token_hash").notNull(),
   confirmedAt: timestamp("confirmed_at", { withTimezone: true }),
   unsubscribedAt: timestamp("unsubscribed_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true })
@@ -226,6 +232,7 @@ export const subscriptions = pgTable("subscriptions", {
   unique("subscriptions_email_type_game_unique")
     .on(table.email, table.type, table.gameId)
     .nullsNotDistinct(),
+  uniqueIndex("subscriptions_token_hash_unique").on(table.tokenHash),
 ]);
 
 // --- Admin minimale (T1.10) ------------------------------------------------

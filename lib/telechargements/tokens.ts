@@ -5,22 +5,15 @@
 // temps de le communiquer (email, page de confirmation) puis il est perdu :
 // une nouvelle visite régénère de nouveaux jetons plutôt que de retrouver
 // les anciens.
-import crypto from "node:crypto";
 import { and, eq, isNull, sql } from "drizzle-orm";
 import type { Database } from "@/db/client";
 import { downloadTokens, games, orderItems, orders } from "@/db/schema";
+import { genererToken, hasherToken } from "@/lib/securite/token";
 
-const OCTETS_TOKEN = 32; // >= 32 octets, exigé par le brief (T1.8).
+export { genererToken, hasherToken };
+
 const JOURS_EXPIRATION = 7;
 const TELECHARGEMENTS_MAX = 5;
-
-export function genererToken(): string {
-  return crypto.randomBytes(OCTETS_TOKEN).toString("hex");
-}
-
-export function hasherToken(tokenClair: string): string {
-  return crypto.createHash("sha256").update(tokenClair).digest("hex");
-}
 
 export interface LienTelechargement {
   token: string;

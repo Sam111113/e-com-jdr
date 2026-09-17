@@ -5,6 +5,7 @@ import { site } from "@/config/site";
 // T1.11 : pas de lien tant qu'elles n'existent pas.
 const LIENS = [
   { href: "/jeux", libelle: "Tous les jeux" },
+  { href: "/jeu-gratuit", libelle: "Jeu gratuit" },
   { href: "/comment-ca-marche", libelle: "Comment ça marche" },
   { href: "/faq", libelle: "FAQ" },
   { href: "/a-propos", libelle: "À propos" },

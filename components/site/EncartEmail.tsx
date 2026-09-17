@@ -1,30 +1,14 @@
-// Encart d'inscription email. L'inscription réelle (double opt-in Brevo,
-// consentement RGPD) arrive avec T1.9 : d'ici là le formulaire est affiché
-// désactivé, avec une mention claire, pour ne rien promettre de faux.
+// Encart d'inscription email (T1.9, liste d'attente générale). Reste un
+// composant serveur : seul FormulaireEncartEmail est un client component,
+// pour garder le reste de la page sans JavaScript inutile.
+import { FormulaireEncartEmail } from "./FormulaireEncartEmail";
+
 export function EncartEmail({ titre, texte }: { titre: string; texte: string }) {
   return (
     <div className="encart">
       <h2 className="section-titre">{titre}</h2>
       <p>{texte}</p>
-      <form className="formulaire-ligne" aria-describedby="encart-email-note">
-        <label htmlFor="encart-email" className="sr-only">
-          Adresse email
-        </label>
-        <input
-          id="encart-email"
-          type="email"
-          name="email"
-          placeholder="votre@email.fr"
-          autoComplete="email"
-          disabled
-        />
-        <button type="submit" className="btn btn-primaire" disabled>
-          Me prévenir
-        </button>
-      </form>
-      <p className="note" id="encart-email-note">
-        Les inscriptions ouvriront très prochainement.
-      </p>
+      <FormulaireEncartEmail />
     </div>
   );
 }

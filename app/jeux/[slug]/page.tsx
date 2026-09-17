@@ -165,7 +165,7 @@ export default async function FicheJeu({ params }: PageProps<"/jeux/[slug]">) {
             </section>
           </div>
 
-          <BlocPrixAction prixEur={jeu.prixEur} slug={jeu.slug} />
+          <BlocPrixAction prixEur={jeu.prixEur} slug={jeu.slug} gameId={jeu.id} titre={jeu.title} />
         </div>
       </div>
 
