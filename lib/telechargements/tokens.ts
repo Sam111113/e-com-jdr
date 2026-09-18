@@ -16,7 +16,8 @@ const JOURS_EXPIRATION = 7;
 
 /**
  * Révoque un jeton de téléchargement (met `revoked_at = now()`).
- * Idempotent : révoquer un jeton déjà révoqué ne fait rien et retourne `true`.
+ * Idempotent : révoquer un jeton déjà révoqué (ou inexistant) ne modifie rien
+ * et retourne `false` — seul le premier appel qui révoque réellement retourne `true`.
  */
 export async function revoquerToken(db: Database, downloadTokenId: number): Promise<boolean> {
   const [ligne] = await db

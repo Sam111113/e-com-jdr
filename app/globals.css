@@ -1181,6 +1181,13 @@ a.hero-badge:hover {
   text-transform: uppercase;
   letter-spacing: 0.02em;
 }
+.table-admin .nb {
+  text-align: right;
+}
+.btn-petit {
+  padding: 0.35rem 0.7rem;
+  font-size: 0.85rem;
+}
 @media (max-width: 640px) {
   .table-admin {
     display: block;

@@ -14,12 +14,16 @@ async function chargerVentesParJeu(): Promise<VentesParJeu[]> {
   await connection();
   const { db } = await import("@/db/client");
 
+  // Somme sur les lignes de commande (prix unitaire × quantité), jamais sur
+  // orders.amountTotal : ce dernier est le total de LA COMMANDE, pas du jeu
+  // — le sommer une fois par ligne jointe le compterait en double dès
+  // qu'une commande contiendrait plusieurs jeux.
   const lignes = await db
     .select({
       titre: games.title,
       slug: games.slug,
       commandes: sqlFn<number>`count(*)::int`,
-      totalCentimes: sqlFn<number>`coalesce(sum(${orders.amountTotal}), 0)`,
+      totalCentimes: sqlFn<number>`coalesce(sum(${orderItems.unitPrice} * ${orderItems.quantity}), 0)`,
     })
     .from(orderItems)
     .innerJoin(orders, eq(orderItems.orderId, orders.id))
