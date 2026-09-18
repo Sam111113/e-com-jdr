@@ -266,3 +266,10 @@
 - **Non vérifié sur le staging :** le conteneur de l'agent n'a pas accès réseau aux conteneurs Docker du staging. Les actions serveur avec formulaires (renvoi de liens, révocation) n'ont pas été rejouées contre le staging, mais la mécanique est identique à celle déjà vérifiée de `connexion/actions.ts` (même `verifierSession`, même `useActionState`).
 - **Commité localement** (pas poussé sur GitHub — une autre session s'en charge après relecture).
 - **T1.10 terminée.**
+
+### 17/09/2026 — T1.10, relecture avant déploiement (agent, en direct)
+- **Bug trouvé en relisant le tableau de bord** (`app/admin/(protege)/page.tsx`) : sommait `orders.amount_total` (total de LA COMMANDE) une fois par ligne jointe avec `order_items` — juste tant qu'une commande ne contient qu'un jeu (le cas actuel), mais aurait doublé le total dès qu'une commande contiendrait plusieurs jeux. Corrigé pour sommer `order_items.unit_price * quantity`, la bonne granularité.
+- **Vérifié en conditions réelles sur le staging** (pas seulement en test) : commande de test à deux lignes pour le même jeu insérée directement en base (`amount_total` 1000, deux lignes à 500) — le tableau de bord affichait bien 10,00 € et non 20,00 € (ce qu'aurait donné le bug). Connexion admin rejouée avec le même protocole que la vérification Brevo (compte jetable, supprimé ensuite). Page commandes vérifiée avec la même commande de test. Toutes les données de test supprimées après vérification.
+- **Corrections mineures au passage :** commentaire de `revoquerToken()` qui annonçait `true` pour un jeton déjà révoqué (le code et son test retournent `false` — idempotente sur son effet, pas sur sa valeur de retour) ; classes CSS manquantes `.btn-petit` et `.table-admin .nb` ajoutées.
+- **Vérifié :** 130 tests unitaires, lint, TypeScript et build au vert après correction.
+- **Commité et poussé sur GitHub.**
